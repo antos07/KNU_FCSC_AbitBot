@@ -2,7 +2,8 @@ from knu_fcsc_bot.models import AbitChatInfo, UsefulLink, Program
 
 
 async def get_main_abit_chat_info_usecase(chat_id: int) -> AbitChatInfo:
-    """"""
+    """Returns main info for given chat_id (useful_links and programs
+    are not guarantied)"""
     return AbitChatInfo(
         chat_id=chat_id,
         flood_chat_link='https://t.me/+BvDQgzxq6jViOTYy',
