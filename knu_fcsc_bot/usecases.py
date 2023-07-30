@@ -1,9 +1,7 @@
 from knu_fcsc_bot.models import AbitChatInfo, UsefulLink, Program
 
 
-async def get_main_abit_chat_info_usecase(chat_id: int) -> AbitChatInfo:
-    """Returns main info for given chat_id (useful_links and programs
-    are not guarantied)"""
+def _get_chat_info(chat_id: int) -> AbitChatInfo:
     return AbitChatInfo(
         chat_id=chat_id,
         flood_chat_link='https://t.me/+BvDQgzxq6jViOTYy',
@@ -18,9 +16,20 @@ async def get_main_abit_chat_info_usecase(chat_id: int) -> AbitChatInfo:
             UsefulLink(title='🚗 Вакансії', url='https://t.me/cybervacancies'),
         ],
         programs=[
-            Program(title='🔹Прикладна математика (113)', guide_url='https://telegra.ph/Gajd-na-spec%D1%96aln%D1%96st-113-Prikladna-matematika-06-03'),
-            Program(title='🔸Програмна інженерія (121)', guide_url='https://telegra.ph/Gajd-na-spec%D1%96aln%D1%96st-121-%D0%86nzhener%D1%96ya-programnogo-zabezpechennya-05-22-2'),
-            Program(title="🔹Комп'ютерні науки (122)", guide_url='https://telegra.ph/Gajd-na-spec%D1%96aln%D1%96st-122-Kompyutern%D1%96-nauki-06-04'),
-            Program(title='🔸Системний аналіз (124)', guide_url='https://telegra.ph/Vse-shcho-vam-treba-znati-pro-Sistemnij-anal%D1%96z-06-01'),
+            Program(id=1, title='🔹Прикладна математика (113)', guide_url='https://telegra.ph/Gajd-na-spec%D1%96aln%D1%96st-113-Prikladna-matematika-06-03'),
+            Program(id=2, title='🔸Програмна інженерія (121)', guide_url='https://telegra.ph/Gajd-na-spec%D1%96aln%D1%96st-121-%D0%86nzhener%D1%96ya-programnogo-zabezpechennya-05-22-2'),
+            Program(id=3, title="🔹Комп'ютерні науки (122)", guide_url='https://telegra.ph/Gajd-na-spec%D1%96aln%D1%96st-122-Kompyutern%D1%96-nauki-06-04'),
+            Program(id=4, title='🔸Системний аналіз (124)', guide_url='https://telegra.ph/Vse-shcho-vam-treba-znati-pro-Sistemnij-anal%D1%96z-06-01'),
         ],
     )
+
+
+async def get_main_abit_chat_info_usecase(chat_id: int) -> AbitChatInfo:
+    """Returns main info for given chat_id (useful_links and programs
+    are not guarantied)"""
+    return _get_chat_info(chat_id)
+
+
+async def list_programs_usecase(chat_id: int) -> list[Program]:
+    """Lists all available programs for the chat"""
+    return _get_chat_info(chat_id).programs

@@ -11,6 +11,7 @@ class UsefulLink:
 @dataclass
 class Program:
     """Information about available program"""
+    id: int
     title: str
     guide_url: str
 
