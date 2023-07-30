@@ -150,3 +150,15 @@ def get_useful_link_list_markup(useful_links: list[UsefulLink],
     ]
     markup.reply_markup = InlineKeyboardMarkup.from_column(buttons)
     return markup
+
+
+def get_message_has_no_file_id_markup() -> TextMarkup:
+    return TextMarkup(
+        text='Повідомлення не містить файлів',
+    )
+
+
+def get_display_file_id_markup(file_id: str) -> TextMarkup:
+    return TextMarkup(
+        text=f'file_id=<code>{html.escape(file_id)}</code>',
+    )

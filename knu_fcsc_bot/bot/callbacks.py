@@ -8,7 +8,8 @@ from knu_fcsc_bot import usecases
 from knu_fcsc_bot.bot import markups
 from knu_fcsc_bot.bot.utils import (did_new_user_join,
                                     schedule_message_deletion,
-                                    reschedule_message_deletion_on_interaction, )
+                                    reschedule_message_deletion_on_interaction,
+                                    get_file_id, )
 
 DELETE_INFO_MENU_AFTER = timedelta(minutes=5)
 
@@ -152,3 +153,17 @@ async def cmd_info(update: Update, context: CallbackContext) -> None:
         after=DELETE_INFO_MENU_AFTER,
         with_reply_to=True,
     )
+
+
+async def cmd_file_id(update: Update, context: CallbackContext) -> None:
+    """A utility command for displaying the file_id of an attachment"""
+    user = update.effective_user
+    chat = update.effective_chat
+    message = update.effective_message
+    logger.info(f'{user} requested file_id of {message} in {chat}')
+
+    if file_id := get_file_id(message.reply_to_message):
+        markup = markups.get_display_file_id_markup(file_id)
+    else:
+        markup = markups.get_message_has_no_file_id_markup()
+    await message.reply_text(**markup.to_kwargs())

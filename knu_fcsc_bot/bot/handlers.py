@@ -41,4 +41,8 @@ def setup_handlers(app: Application) -> None:
             callback=callbacks.cmd_info,
             filters=filters.ChatType.GROUPS,
         ),
+        CommandHandler(
+            command='file_id',
+            callback=callbacks.cmd_file_id,
+        ),
     ])
