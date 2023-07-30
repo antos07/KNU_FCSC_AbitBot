@@ -21,4 +21,8 @@ def setup_handlers(app: Application) -> None:
             callback=callbacks.cd_program_by_id,
             pattern=r'^program_by_id:(?P<id>\d+)$',
         ),
+        CallbackQueryHandler(
+            callback=callbacks.cd_main_menu,
+            pattern=r'^main_menu$',
+        ),
     ])

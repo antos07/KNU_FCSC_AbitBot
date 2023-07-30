@@ -61,3 +61,15 @@ async def cd_program_by_id(update: Update,
 
     markup = markups.get_program_detail_markup(program, user)
     await update.effective_message.edit_text(**markup.to_kwargs())
+
+
+async def cd_main_menu(update: Update, context: CallbackContext) -> None:
+    """Displays main page of info menu"""
+    user = update.effective_user
+    chat = update.effective_chat
+    logger.info(f'{user} requested main page of info menu in {chat}')
+
+    abit_chat_info = await usecases.get_main_abit_chat_info_usecase(chat.id)
+
+    markup = markups.get_main_page_of_info_menu_markup(abit_chat_info, user)
+    await update.effective_message.edit_text(**markup.to_kwargs())

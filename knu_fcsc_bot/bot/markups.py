@@ -35,12 +35,10 @@ class AlertMarkup(BaseMarkup):
     show_alert: bool = None
 
 
-def get_new_user_greeting_markup(abit_chat_info: AbitChatInfo,
-                                 user: User) -> TextMarkup:
-    """Builds a greeting text message for a new chat user with all the info"""
-    markup = TextMarkup()
-    markup.text = f'👋 {user.mention_html()}, вітаю в чаті абітурієнтів ФКНК!'
-    markup.reply_markup = InlineKeyboardMarkup.from_column([
+def _build_main_page_of_info_menu_reply_markup(
+        abit_chat_info: AbitChatInfo
+) -> ReplyMarkup:
+    return InlineKeyboardMarkup.from_column([
         InlineKeyboardButton(
             text='🎓 Освітні програми',
             callback_data='programs',
@@ -54,6 +52,16 @@ def get_new_user_greeting_markup(abit_chat_info: AbitChatInfo,
             url=abit_chat_info.flood_chat_link,
         ),
     ])
+
+
+def get_new_user_greeting_markup(abit_chat_info: AbitChatInfo,
+                                 user: User) -> TextMarkup:
+    """Builds a greeting text message for a new chat user with all the info"""
+    markup = TextMarkup()
+    markup.text = f'👋 {user.mention_html()}, вітаю в чаті абітурієнтів ФКНК!'
+    markup.reply_markup = _build_main_page_of_info_menu_reply_markup(
+        abit_chat_info=abit_chat_info
+    )
     return markup
 
 
@@ -89,7 +97,8 @@ def get_program_not_found_alert_markup() -> AlertMarkup:
     )
 
 
-def get_program_detail_markup(program: Program, requested_by) -> TextMarkup:
+def get_program_detail_markup(program: Program,
+                              requested_by: User) -> TextMarkup:
     """Builds program detail markup"""
     markup = TextMarkup()
     guide_url = html.escape(program.guide_url)
@@ -104,4 +113,15 @@ def get_program_detail_markup(program: Program, requested_by) -> TextMarkup:
         )
     )
     markup.disable_web_page_preview = True
+    return markup
+
+
+def get_main_page_of_info_menu_markup(abit_chat_info: AbitChatInfo,
+                                      requested_by: User) -> TextMarkup:
+    markup = TextMarkup()
+    markup.text = (f'<b>[📖Інформаційна довідка</b> для '
+                   f'{requested_by.mention_html()}<b>]</b>')
+    markup.reply_markup = _build_main_page_of_info_menu_reply_markup(
+        abit_chat_info=abit_chat_info
+    )
     return markup
