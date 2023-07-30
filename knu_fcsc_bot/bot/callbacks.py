@@ -1,10 +1,16 @@
+from datetime import timedelta
+
 from loguru import logger
 from telegram import Update
 from telegram.ext import CallbackContext
 
 from knu_fcsc_bot import usecases
 from knu_fcsc_bot.bot import markups
-from knu_fcsc_bot.bot.utils import did_new_user_join
+from knu_fcsc_bot.bot.utils import (did_new_user_join,
+                                    schedule_message_deletion,
+                                    reschedule_message_deletion_on_interaction, )
+
+DELETE_INFO_MENU_AFTER = timedelta(minutes=5)
 
 
 async def unhandled_exception(update: Update | object | None,
@@ -30,9 +36,16 @@ async def chat_member_updated(update: Update,
     info = await usecases.get_main_abit_chat_info_usecase(chat.id)
 
     markup = markups.get_new_user_greeting_markup(info, user)
-    await chat.send_message(**markup.to_kwargs())
+    message = await chat.send_message(**markup.to_kwargs())
+
+    schedule_message_deletion(
+        job_queue=context.job_queue,
+        message=message,
+        after=DELETE_INFO_MENU_AFTER,
+    )
 
 
+@reschedule_message_deletion_on_interaction(DELETE_INFO_MENU_AFTER)
 async def cd_programs(update: Update,
                       context: CallbackContext) -> None:
     """Lists all available programs for this chat"""
@@ -46,6 +59,7 @@ async def cd_programs(update: Update,
     await update.effective_message.edit_text(**markup.to_kwargs())
 
 
+@reschedule_message_deletion_on_interaction(DELETE_INFO_MENU_AFTER)
 async def cd_program_by_id(update: Update,
                            context: CallbackContext) -> None:
     """Displays info about program by its id"""
@@ -65,6 +79,7 @@ async def cd_program_by_id(update: Update,
     await update.effective_message.edit_text(**markup.to_kwargs())
 
 
+@reschedule_message_deletion_on_interaction(DELETE_INFO_MENU_AFTER)
 async def cd_main_menu(update: Update, context: CallbackContext) -> None:
     """Displays main page of info menu"""
     user = update.effective_user
@@ -77,6 +92,7 @@ async def cd_main_menu(update: Update, context: CallbackContext) -> None:
     await update.effective_message.edit_text(**markup.to_kwargs())
 
 
+@reschedule_message_deletion_on_interaction(DELETE_INFO_MENU_AFTER)
 async def cd_useful_links(update: Update, context: CallbackContext) -> None:
     """Displays a list of useful links as an inline keyboard"""
     user = update.effective_user
@@ -98,4 +114,11 @@ async def cmd_info(update: Update, context: CallbackContext) -> None:
     abit_chat_info = await usecases.get_main_abit_chat_info_usecase(chat.id)
 
     markup = markups.get_main_page_of_info_menu_markup(abit_chat_info, user)
-    await update.effective_message.reply_text(**markup.to_kwargs())
+    message = await update.effective_message.reply_text(**markup.to_kwargs())
+
+    schedule_message_deletion(
+        job_queue=context.job_queue,
+        message=message,
+        after=DELETE_INFO_MENU_AFTER,
+        with_reply_to=True,
+    )

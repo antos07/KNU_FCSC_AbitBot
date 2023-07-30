@@ -8,7 +8,7 @@ packages = [{include = "knu_fcsc_abitbot"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-python-telegram-bot = {extras = ["http2", "rate-limiter"], version = "^20.4"}
+python-telegram-bot = {extras = ["http2", "job-queue", "rate-limiter"], version = "^20.4"}
 loguru = "^0.7.0"
 
 
