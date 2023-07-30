@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "knu-fcsc-abitbot"
+version = "0.1.0"
+description = ""
+authors = ["antos07 <trotsenko.ant07@gmail.com>"]
+readme = "README.md"
+packages = [{include = "knu_fcsc_abitbot"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+python-telegram-bot = {extras = ["http2", "rate-limiter"], version = "^20.4"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
