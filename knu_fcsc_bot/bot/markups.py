@@ -5,7 +5,7 @@ from typing import Any
 from telegram import User, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram._utils.types import ReplyMarkup
 
-from knu_fcsc_bot.models import AbitChatInfo, Program
+from knu_fcsc_bot.models import AbitChatInfo, Program, UsefulLink
 
 
 @dataclass
@@ -118,10 +118,35 @@ def get_program_detail_markup(program: Program,
 
 def get_main_page_of_info_menu_markup(abit_chat_info: AbitChatInfo,
                                       requested_by: User) -> TextMarkup:
+    """Builds main menu page without greetings"""
     markup = TextMarkup()
     markup.text = (f'<b>[📖Інформаційна довідка</b> для '
                    f'{requested_by.mention_html()}<b>]</b>')
     markup.reply_markup = _build_main_page_of_info_menu_reply_markup(
         abit_chat_info=abit_chat_info
     )
+    return markup
+
+
+def get_useful_link_list_markup(useful_links: list[UsefulLink],
+                                requested_by: User) -> TextMarkup:
+    """Builds a text message with useful links as inline buttons"""
+    markup = TextMarkup()
+    markup.text = (f'<b>[📖Інформаційна довідка</b> для '
+                   f'{requested_by.mention_html()}<b>]</b>\n\n'
+                   f'📎 Корисні посилання:')
+    buttons = [
+        InlineKeyboardButton(
+            text=link.title,
+            url=link.url,
+        )
+        for link in useful_links
+    ]
+    buttons += [
+        InlineKeyboardButton(
+            text='🔙 Назад',
+            callback_data='main_menu'
+        ),
+    ]
+    markup.reply_markup = InlineKeyboardMarkup.from_column(buttons)
     return markup

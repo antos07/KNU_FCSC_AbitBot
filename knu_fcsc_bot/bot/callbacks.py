@@ -12,6 +12,8 @@ async def unhandled_exception(update: Update | object | None,
     """Logs unhandled exceptions"""
     message = 'Unhandled exception'
     if update:
+        # Using of f-string resulted in a wierd exception. So
+        # here update kwarg is passed to the logger.
         message += ' while processing {update}'
     logger.exception(message, update=update, exception=context.error)
 
@@ -72,4 +74,16 @@ async def cd_main_menu(update: Update, context: CallbackContext) -> None:
     abit_chat_info = await usecases.get_main_abit_chat_info_usecase(chat.id)
 
     markup = markups.get_main_page_of_info_menu_markup(abit_chat_info, user)
+    await update.effective_message.edit_text(**markup.to_kwargs())
+
+
+async def cd_useful_links(update: Update, context: CallbackContext) -> None:
+    """Displays a list of useful links as an inline keyboard"""
+    user = update.effective_user
+    chat = update.effective_chat
+    logger.info(f'{user} requested useful links in {chat}')
+
+    useful_links = await usecases.list_useful_links_usecase(chat.id)
+
+    markup = markups.get_useful_link_list_markup(useful_links, user)
     await update.effective_message.edit_text(**markup.to_kwargs())

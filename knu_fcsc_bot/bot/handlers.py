@@ -7,11 +7,13 @@ def setup_handlers(app: Application) -> None:
     """Setup handlers for the given application"""
     app.add_error_handler(callback=callbacks.unhandled_exception)
 
+    # Greetings for new chat members
     app.add_handler(ChatMemberHandler(
         callback=callbacks.chat_member_updated,
         chat_member_types=ChatMemberHandler.CHAT_MEMBER,
     ))
 
+    # Info menu actions
     app.add_handlers([
         CallbackQueryHandler(
             callback=callbacks.cd_programs,
@@ -24,5 +26,9 @@ def setup_handlers(app: Application) -> None:
         CallbackQueryHandler(
             callback=callbacks.cd_main_menu,
             pattern=r'^main_menu$',
+        ),
+        CallbackQueryHandler(
+            callback=callbacks.cd_useful_links,
+            pattern=r'^useful_links$',
         ),
     ])

@@ -51,3 +51,8 @@ async def get_program_by_id_usecase(program_id: int) -> Program:
         if program.id == program_id:
             return program
     raise
+
+
+async def list_useful_links_usecase(chat_id: int) -> list[UsefulLink]:
+    """Lists the useful links for the given chat"""
+    return _get_chat_info(chat_id).useful_links
