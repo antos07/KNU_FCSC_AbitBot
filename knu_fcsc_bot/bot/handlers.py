@@ -1,4 +1,5 @@
-from telegram.ext import Application, ChatMemberHandler, CallbackQueryHandler
+from telegram.ext import (Application, ChatMemberHandler, CallbackQueryHandler,
+                          CommandHandler, filters, )
 
 from knu_fcsc_bot.bot import callbacks
 
@@ -30,5 +31,14 @@ def setup_handlers(app: Application) -> None:
         CallbackQueryHandler(
             callback=callbacks.cd_useful_links,
             pattern=r'^useful_links$',
+        ),
+    ])
+
+    # Commands
+    app.add_handlers([
+        CommandHandler(
+            command='info',
+            callback=callbacks.cmd_info,
+            filters=filters.ChatType.GROUPS,
         ),
     ])

@@ -18,6 +18,7 @@ def main():
     allowed_updates = [
         UpdateType.CHAT_MEMBER,
         UpdateType.CALLBACK_QUERY,
+        UpdateType.MESSAGE,
     ]
     app.run_polling(allowed_updates=allowed_updates)
 
