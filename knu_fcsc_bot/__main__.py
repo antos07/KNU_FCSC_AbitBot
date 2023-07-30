@@ -1,5 +1,6 @@
 import os
 
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from telegram.constants import ParseMode, UpdateType
 from telegram.ext import ApplicationBuilder, Defaults
 
@@ -14,6 +15,10 @@ def main():
            .defaults(Defaults(parse_mode=ParseMode.HTML))
            .build())
     setup_handlers(app)
+
+    engine = create_async_engine(url=os.environ['DATABASE_URL'])
+    sessionmaker = async_sessionmaker(bind=engine, expire_on_commit=False)
+    app.bot_data['AsyncSession'] = sessionmaker
 
     allowed_updates = [
         UpdateType.CHAT_MEMBER,

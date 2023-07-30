@@ -1,25 +1,59 @@
-from dataclasses import dataclass, field
+from sqlalchemy import String, BigInteger, ForeignKey
+from sqlalchemy.orm import (DeclarativeBase, Mapped, mapped_column,
+                            relationship, MappedAsDataclass, )
+
+MAX_URL_LENGTH = 500
 
 
-@dataclass
-class UsefulLink:
+class Base(MappedAsDataclass, DeclarativeBase):
+    """A base class for all models"""
+
+
+class UsefulLink(Base):
     """A useful link in chat"""
-    title: str
-    url: str
+    MAX_TITLE_LENGTH = 50
+
+    __tablename__ = 'useful_links'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True,
+                                    init=False)
+    title: Mapped[str] = mapped_column(String(MAX_TITLE_LENGTH))
+    url: Mapped[str] = mapped_column(String(MAX_URL_LENGTH))
+
+    chat_id: Mapped[int] = mapped_column(BigInteger,
+                                         ForeignKey('abit_chat_info'),
+                                         default=None)
 
 
-@dataclass
-class Program:
+class Program(Base):
     """Information about available program"""
-    id: int
-    title: str
-    guide_url: str
+    MAX_TITLE_LENGTH = 50
+
+    __tablename__ = 'programs'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True,
+                                    init=False)
+    title: Mapped[str] = mapped_column(String(MAX_TITLE_LENGTH))
+    guide_url: Mapped[str] = mapped_column(String(MAX_URL_LENGTH))
+
+    chat_id: Mapped[int] = mapped_column(BigInteger,
+                                         ForeignKey('abit_chat_info'),
+                                         default=None)
 
 
-@dataclass
-class AbitChatInfo:
+class AbitChatInfo(Base):
     """Some basic info to be displayed in the abiturient chat"""
-    chat_id: int
-    flood_chat_link: str
-    useful_links: list[UsefulLink] = field(default_factory=list)
-    programs: list[Program] = field(default_factory=list)
+
+    __tablename__ = 'abit_chat_info'
+
+    chat_id: Mapped[int] = mapped_column(BigInteger,
+                                         primary_key=True, autoincrement=False)
+    flood_chat_link: Mapped[str] = mapped_column(String(MAX_URL_LENGTH))
+    useful_links: Mapped[list[UsefulLink]] = relationship(
+        default_factory=list,
+        lazy='raise'
+    )
+    programs: Mapped[list[Program]] = relationship(
+        default_factory=list,
+        lazy='raise'
+    )

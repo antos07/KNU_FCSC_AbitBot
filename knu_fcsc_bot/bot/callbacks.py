@@ -33,7 +33,14 @@ async def chat_member_updated(update: Update,
         return
     logger.info(f'{user} joined {chat}')
 
-    info = await usecases.get_main_abit_chat_info_usecase(chat.id)
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        try:
+            info = await usecases.get_main_abit_chat_info_usecase(session,
+                                                                  chat.id)
+        except usecases.DoesNotExist:
+            # Ignoring unsupported chat
+            return
 
     markup = markups.get_new_user_greeting_markup(info, user)
     message = await chat.send_message(**markup.to_kwargs())
@@ -53,7 +60,9 @@ async def cd_programs(update: Update,
     chat = update.effective_chat
     logger.info(f'{user} requested program list in {chat}')
 
-    programs = await usecases.list_programs_usecase(chat.id)
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        programs = await usecases.list_programs_usecase(session, chat.id)
 
     markup = markups.get_program_list_markup(programs, user)
     await update.effective_message.edit_text(**markup.to_kwargs())
@@ -68,12 +77,16 @@ async def cd_program_by_id(update: Update,
     chat = update.effective_chat
     logger.info(f'{user} requested program with id={program_id} in {chat}')
 
-    try:
-        program = await usecases.get_program_by_id_usecase(program_id)
-    except usecases.DoesNotExist:
-        markup = markups.get_program_not_found_alert_markup()
-        await update.callback_query.answer(**markup.to_kwargs(), cache_time=60)
-        return
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        try:
+            program = await usecases.get_program_by_id_usecase(session,
+                                                               program_id)
+        except usecases.DoesNotExist:
+            markup = markups.get_program_not_found_alert_markup()
+            await update.callback_query.answer(**markup.to_kwargs(),
+                                               cache_time=60)
+            return
 
     markup = markups.get_program_detail_markup(program, user)
     await update.effective_message.edit_text(**markup.to_kwargs())
@@ -86,7 +99,12 @@ async def cd_main_menu(update: Update, context: CallbackContext) -> None:
     chat = update.effective_chat
     logger.info(f'{user} requested main page of info menu in {chat}')
 
-    abit_chat_info = await usecases.get_main_abit_chat_info_usecase(chat.id)
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        abit_chat_info = await usecases.get_main_abit_chat_info_usecase(
+            session=session,
+            chat_id=chat.id,
+        )
 
     markup = markups.get_main_page_of_info_menu_markup(abit_chat_info, user)
     await update.effective_message.edit_text(**markup.to_kwargs())
@@ -99,7 +117,10 @@ async def cd_useful_links(update: Update, context: CallbackContext) -> None:
     chat = update.effective_chat
     logger.info(f'{user} requested useful links in {chat}')
 
-    useful_links = await usecases.list_useful_links_usecase(chat.id)
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        useful_links = await usecases.list_useful_links_usecase(session,
+                                                                chat.id)
 
     markup = markups.get_useful_link_list_markup(useful_links, user)
     await update.effective_message.edit_text(**markup.to_kwargs())
@@ -111,7 +132,16 @@ async def cmd_info(update: Update, context: CallbackContext) -> None:
     chat = update.effective_chat
     logger.info(f'{user} requested main page of info menu via /info in {chat}')
 
-    abit_chat_info = await usecases.get_main_abit_chat_info_usecase(chat.id)
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        try:
+            abit_chat_info = await usecases.get_main_abit_chat_info_usecase(
+                session=session,
+                chat_id=chat.id,
+            )
+        except usecases.DoesNotExist:
+            # Ignoring unsupported chat
+            return
 
     markup = markups.get_main_page_of_info_menu_markup(abit_chat_info, user)
     message = await update.effective_message.reply_text(**markup.to_kwargs())
