@@ -15,6 +15,10 @@ def setup_handlers(app: Application) -> None:
     app.add_handlers([
         CallbackQueryHandler(
             callback=callbacks.cd_programs,
-            pattern='^programs$'
+            pattern=r'^programs$'
+        ),
+        CallbackQueryHandler(
+            callback=callbacks.cd_program_by_id,
+            pattern=r'^program_by_id:(?P<id>\d+)$',
         ),
     ])

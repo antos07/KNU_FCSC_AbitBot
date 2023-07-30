@@ -42,3 +42,22 @@ async def cd_programs(update: Update,
 
     markup = markups.get_program_list_markup(programs, user)
     await update.effective_message.edit_text(**markup.to_kwargs())
+
+
+async def cd_program_by_id(update: Update,
+                           context: CallbackContext) -> None:
+    """Displays info about program by its id"""
+    program_id = int(context.match.group('id'))
+    user = update.effective_user
+    chat = update.effective_chat
+    logger.info(f'{user} requested program with id={program_id} in {chat}')
+
+    try:
+        program = await usecases.get_program_by_id_usecase(program_id)
+    except usecases.DoesNotExist:
+        markup = markups.get_program_not_found_alert_markup()
+        await update.callback_query.answer(**markup.to_kwargs(), cache_time=60)
+        return
+
+    markup = markups.get_program_detail_markup(program, user)
+    await update.effective_message.edit_text(**markup.to_kwargs())

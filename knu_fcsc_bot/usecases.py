@@ -1,6 +1,15 @@
 from knu_fcsc_bot.models import AbitChatInfo, UsefulLink, Program
 
 
+class Error(Exception):
+    """Base exception class for this module"""
+    pass
+
+
+class DoesNotExist(Error):
+    """Requested object does not exist"""
+
+
 def _get_chat_info(chat_id: int) -> AbitChatInfo:
     return AbitChatInfo(
         chat_id=chat_id,
@@ -33,3 +42,12 @@ async def get_main_abit_chat_info_usecase(chat_id: int) -> AbitChatInfo:
 async def list_programs_usecase(chat_id: int) -> list[Program]:
     """Lists all available programs for the chat"""
     return _get_chat_info(chat_id).programs
+
+
+async def get_program_by_id_usecase(program_id: int) -> Program:
+    """Gets program by its id"""
+    info = _get_chat_info(None)
+    for program in info.programs:
+        if program.id == program_id:
+            return program
+    raise
