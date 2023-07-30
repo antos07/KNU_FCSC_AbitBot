@@ -36,6 +36,7 @@ with Session(bind=engine) as session:
             Program(title='🔸Системний аналіз (124)',
                     guide_url='https://telegra.ph/Vse-shcho-vam-treba-znati-pro-Sistemnij-anal%D1%96z-06-01'),
         ],
+        greeting_photo_file_id='AgACAgIAAxkBAAIFrmTGyc6UgGhTHiPyLQ5FUJUOfMttAAKUxzEbhjZAS5JoZuST6gOeAQADAgADeQADLwQ'
     )
     session.add(info)
     session.commit()

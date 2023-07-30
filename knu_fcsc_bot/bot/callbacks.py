@@ -44,7 +44,7 @@ async def chat_member_updated(update: Update,
             return
 
     markup = markups.get_new_user_greeting_markup(info, user)
-    message = await chat.send_message(**markup.to_kwargs())
+    message = await chat.send_photo(**markup.to_kwargs())
 
     schedule_message_deletion(
         job_queue=context.job_queue,
@@ -66,7 +66,7 @@ async def cd_programs(update: Update,
         programs = await usecases.list_programs_usecase(session, chat.id)
 
     markup = markups.get_program_list_markup(programs, user)
-    await update.effective_message.edit_text(**markup.to_kwargs())
+    await update.effective_message.edit_caption(**markup.to_kwargs())
 
 
 @reschedule_message_deletion_on_interaction(DELETE_INFO_MENU_AFTER)
@@ -90,7 +90,7 @@ async def cd_program_by_id(update: Update,
             return
 
     markup = markups.get_program_detail_markup(program, user)
-    await update.effective_message.edit_text(**markup.to_kwargs())
+    await update.effective_message.edit_caption(**markup.to_kwargs())
 
 
 @reschedule_message_deletion_on_interaction(DELETE_INFO_MENU_AFTER)
@@ -108,7 +108,7 @@ async def cd_main_menu(update: Update, context: CallbackContext) -> None:
         )
 
     markup = markups.get_main_page_of_info_menu_markup(abit_chat_info, user)
-    await update.effective_message.edit_text(**markup.to_kwargs())
+    await update.effective_message.edit_caption(**markup.to_kwargs())
 
 
 @reschedule_message_deletion_on_interaction(DELETE_INFO_MENU_AFTER)
@@ -124,7 +124,7 @@ async def cd_useful_links(update: Update, context: CallbackContext) -> None:
                                                                 chat.id)
 
     markup = markups.get_useful_link_list_markup(useful_links, user)
-    await update.effective_message.edit_text(**markup.to_kwargs())
+    await update.effective_message.edit_caption(**markup.to_kwargs())
 
 
 async def cmd_info(update: Update, context: CallbackContext) -> None:
@@ -145,7 +145,7 @@ async def cmd_info(update: Update, context: CallbackContext) -> None:
             return
 
     markup = markups.get_main_page_of_info_menu_markup(abit_chat_info, user)
-    message = await update.effective_message.reply_text(**markup.to_kwargs())
+    message = await update.effective_message.reply_photo(**markup.to_kwargs())
 
     schedule_message_deletion(
         job_queue=context.job_queue,

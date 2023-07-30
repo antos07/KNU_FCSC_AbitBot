@@ -43,11 +43,15 @@ class Program(Base):
 
 class AbitChatInfo(Base):
     """Some basic info to be displayed in the abiturient chat"""
+    MAX_FILE_ID_LENGTH = 100
 
     __tablename__ = 'abit_chat_info'
 
     chat_id: Mapped[int] = mapped_column(BigInteger,
                                          primary_key=True, autoincrement=False)
+    greeting_photo_file_id: Mapped[str] = mapped_column(
+        String(MAX_FILE_ID_LENGTH),
+    )
     flood_chat_link: Mapped[str] = mapped_column(String(MAX_URL_LENGTH))
     useful_links: Mapped[list[UsefulLink]] = relationship(
         default_factory=list,
