@@ -12,7 +12,7 @@ python-telegram-bot = {extras = ["http2", "job-queue", "rate-limiter"], version 
 loguru = "^0.7.0"
 sqlalchemy = "^2.0.19"
 alembic = "^1.11.1"
-psycopg = "^3.1.9"
+psycopg = {extras = ["binary"], version = "^3.1.9"}
 python-dateutil = "^2.8.2"
 
 
