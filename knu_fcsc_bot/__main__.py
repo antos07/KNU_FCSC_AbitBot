@@ -2,7 +2,7 @@ import os
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from telegram.constants import ParseMode, UpdateType
-from telegram.ext import ApplicationBuilder, Defaults
+from telegram.ext import ApplicationBuilder, Defaults, AIORateLimiter
 
 from knu_fcsc_bot.bot.handlers import setup_handlers
 
@@ -13,6 +13,7 @@ def main():
            .get_updates_http_version('2')
            .http_version('2')
            .defaults(Defaults(parse_mode=ParseMode.HTML))
+           .rate_limiter(AIORateLimiter(max_retries=2))
            .build())
     setup_handlers(app)
 

@@ -37,7 +37,12 @@ class PhotoMarkup(BaseMarkup):
     photo: FileInput | PhotoSize = None
     caption: str = None
     reply_markup: ReplyMarkup = None
-    disable_web_page_preview: bool = None
+
+    def to_kwargs(self, *, caption_only: bool = False) -> dict[str, Any]:
+        kwargs = super().to_kwargs()
+        if caption_only and 'photo' in kwargs:
+            del kwargs['photo']
+        return kwargs
 
 
 @dataclass
@@ -117,8 +122,7 @@ def get_program_detail_markup(program: Program,
     guide_url = html.escape(program.guide_url)
     markup.caption = (f'<b>[📖Інформаційна довідка</b> для '
                       f'{requested_by.mention_html()}<b>]</b>\n\n'
-                      f'<b>💻 Освітня програма:</b> Прикладна математика (113)'
-                      f'\n\n'
+                      f'<b>💻 Освітня програма:</b> {program.title}\n\n'
                       f'<a href="{guide_url}">⚙️ Гайд по спеціальності ⚙️</a>')
     markup.reply_markup = InlineKeyboardMarkup.from_button(
         button=InlineKeyboardButton(
@@ -126,7 +130,6 @@ def get_program_detail_markup(program: Program,
             callback_data='programs',
         )
     )
-    markup.disable_web_page_preview = True
     return markup
 
 
