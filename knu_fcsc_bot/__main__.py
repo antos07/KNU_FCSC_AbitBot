@@ -5,9 +5,15 @@ from telegram.constants import ParseMode, UpdateType
 from telegram.ext import ApplicationBuilder, Defaults, AIORateLimiter
 
 from knu_fcsc_bot.bot.handlers import setup_handlers
+from knu_fcsc_bot.logginig import (redirect_standard_logging_to_loguru,
+                                   disable_low_level_logs, set_logging_level, )
 
 
 def main():
+    redirect_standard_logging_to_loguru()
+    disable_low_level_logs()
+    set_logging_level('INFO')
+
     app = (ApplicationBuilder()
            .token(os.environ['BOT_TOKEN'])
            .get_updates_http_version('2')
