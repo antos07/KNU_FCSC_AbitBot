@@ -15,10 +15,22 @@ from knu_fcsc_bot.usecases import list_allowed_chat_ids_usecase
 
 
 @dataclass
+class WebhookOptions:
+    """Sub-options for webhooks setup. Default values are taken from
+    Application.start_webhook docs"""
+    host: str = "127.0.0.1"
+    port: int = 80
+    url_path: str = ""
+    webhook_url: str = None
+
+
+@dataclass
 class StartupOptions:
     """A collection of startup options"""
     verbose_logging: bool = False
+
     use_webhook: bool = False
+    webhook_options: WebhookOptions = None
 
 
 def get_startup_options() -> StartupOptions:
@@ -26,16 +38,41 @@ def get_startup_options() -> StartupOptions:
     parser = ArgumentParser()
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='If present, enables DEBUG log-level', )
-    parser.add_argument('--use-webhook', '-w',
-                        action='store_true',
-                        help='If present, switches to using webhook instead '
-                             'of long polling')
+    subparsers = parser.add_subparsers()
+
+    # Polling options
+    polling_parser = subparsers.add_parser('polling', help='Run polling')
+    polling_parser.set_defaults(use_webhook=False)
+
+    # Webhook options
+    webhook_parser = subparsers.add_parser('webhook', help='Run webhook')
+    webhook_parser.set_defaults(use_webhook=True)
+    webhook_parser.add_argument('--host', '-l',
+                                help='Host to listen',
+                                default=WebhookOptions.host)
+    webhook_parser.add_argument('--port', '-p', type=int,
+                                help='Port to listen',
+                                default=WebhookOptions.port)
+    webhook_parser.add_argument('--url-path', '-u',
+                                help='Url path',
+                                default=WebhookOptions.url_path)
+    webhook_parser.add_argument('--webhook-url', '-w',
+                                help='A url that will be used by Telegram to'
+                                     'reference the webhook')
 
     args = parser.parse_args()
-    return StartupOptions(
+    options = StartupOptions(
         verbose_logging=args.verbose,
         use_webhook=args.use_webhook,
     )
+    if options.use_webhook:
+        options.webhook_options = WebhookOptions(
+            host=args.host,
+            port=args.port,
+            url_path=args.url_path,
+            webhook_url=args.webhook_url,
+        )
+    return options
 
 
 async def app_post_init(app: Application) -> None:
@@ -90,7 +127,14 @@ def main():
         UpdateType.MESSAGE,
     ]
     if startup_options.use_webhook:
-        app.run_webhook(allowed_updates=allowed_updates)
+        # using webhook
+        app.run_webhook(
+            listen=startup_options.webhook_options.host,
+            port=startup_options.webhook_options.port,
+            url_path=startup_options.webhook_options.url_path,
+            webhook_url=startup_options.webhook_options.webhook_url,
+            allowed_updates=allowed_updates,
+        )
     else:
         app.run_polling(allowed_updates=allowed_updates)
 
