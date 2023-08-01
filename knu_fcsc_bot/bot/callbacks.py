@@ -175,3 +175,11 @@ async def cmd_file_id(update: Update, context: CallbackContext) -> None:
     else:
         markup = markups.get_message_has_no_file_id_markup()
     await message.reply_text(**markup.to_kwargs())
+
+
+async def message_from_not_allowed_chat(update: Update,
+                                        context: CallbackContext) -> None:
+    """Logs update from not allowed chat"""
+    message = update.effective_message
+    chat = update.effective_chat
+    logger.info(f'{chat} is not allowed: {message}')

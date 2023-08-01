@@ -1,5 +1,5 @@
 from telegram.ext import (Application, ChatMemberHandler, CallbackQueryHandler,
-                          CommandHandler, filters, )
+                          CommandHandler, filters, MessageHandler, )
 
 from knu_fcsc_bot.bot import callbacks
 
@@ -7,6 +7,14 @@ from knu_fcsc_bot.bot import callbacks
 def setup_handlers(app: Application) -> None:
     """Setup handlers for the given application"""
     app.add_error_handler(callback=callbacks.unhandled_exception)
+
+    # Skip messages from all chats, except allowed chats
+    allowed_chat_filter = filters.Chat()
+    app.bot_data['allowed_chat_filter'] = allowed_chat_filter
+    app.add_handler(MessageHandler(
+        filters=~allowed_chat_filter,
+        callback=callbacks.message_from_not_allowed_chat,
+    ))
 
     # Greetings for new chat members
     app.add_handler(ChatMemberHandler(

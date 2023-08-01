@@ -48,3 +48,10 @@ async def list_useful_links_usecase(session: AsyncSession,
     """Lists the useful links for the given chat"""
     stmt = select(UsefulLink).where(UsefulLink.chat_id == chat_id)
     return list((await session.scalars(stmt)).all())
+
+
+async def list_allowed_chat_ids_usecase(session: AsyncSession) -> list[int]:
+    """Lists all allowed chat ids"""
+    stmt = select(AbitChatInfo.chat_id)
+    scalar_results = await session.scalars(stmt)
+    return list(scalar_results)
