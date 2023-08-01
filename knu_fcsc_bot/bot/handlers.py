@@ -16,6 +16,12 @@ def setup_handlers(app: Application) -> None:
         callback=callbacks.message_from_not_allowed_chat,
     ))
 
+    # Logging when this bot is added to chats
+    app.add_handler(ChatMemberHandler(
+        callback=callbacks.my_chat_member_updated,
+        chat_member_types=ChatMemberHandler.MY_CHAT_MEMBER,
+    ))
+
     # Greetings for new chat members
     app.add_handler(ChatMemberHandler(
         callback=callbacks.chat_member_updated,

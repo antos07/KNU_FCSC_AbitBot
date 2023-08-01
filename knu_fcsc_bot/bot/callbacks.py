@@ -183,3 +183,11 @@ async def message_from_not_allowed_chat(update: Update,
     message = update.effective_message
     chat = update.effective_chat
     logger.info(f'{chat} is not allowed: {message}')
+
+
+async def my_chat_member_updated(update: Update,
+                                 context: CallbackContext) -> None:
+    """Logs when bot is added to a new chat"""
+    if not did_new_user_join(update.my_chat_member):
+        return
+    logger.info(f'Bot is added to {update.effective_chat}')
