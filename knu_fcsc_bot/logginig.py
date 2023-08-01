@@ -39,6 +39,7 @@ def disable_low_level_logs() -> None:
     logger.disable('httpcore')
     logger.disable('hpack')
     logger.disable('psycopg')
+    logger.disable('apscheduler')
 
 
 def set_logging_level(level: int | str) -> None:
