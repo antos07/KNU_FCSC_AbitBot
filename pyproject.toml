@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["antos07 <trotsenko.ant07@gmail.com>"]
 readme = "README.md"
-packages = [{include = "knu_fcsc_abitbot"}]
+packages = [{include = "knu_fcsc_bot"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
