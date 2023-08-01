@@ -38,6 +38,7 @@ def get_startup_options() -> StartupOptions:
     parser = ArgumentParser()
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='If present, enables DEBUG log-level', )
+    parser.set_defaults(use_webhook=None)
     subparsers = parser.add_subparsers()
 
     # Polling options
@@ -65,6 +66,10 @@ def get_startup_options() -> StartupOptions:
         verbose_logging=args.verbose,
         use_webhook=args.use_webhook,
     )
+    if options.use_webhook is None:
+        # No running option specified. Printing help.
+        parser.print_help()
+        parser.exit()
     if options.use_webhook:
         options.webhook_options = WebhookOptions(
             host=args.host,
