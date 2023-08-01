@@ -125,6 +125,7 @@ def main():
         UpdateType.CHAT_MEMBER,
         UpdateType.CALLBACK_QUERY,
         UpdateType.MESSAGE,
+        UpdateType.MY_CHAT_MEMBER,
     ]
     if startup_options.use_webhook:
         # using webhook
