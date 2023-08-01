@@ -49,6 +49,17 @@ async def app_post_init(app: Application) -> None:
     logger.info(f'Registered allowed chat ids {allowed_chat_ids}')
 
 
+def setup_sqlalchemy(app: Application) -> None:
+    """Setup sqlalchemy"""
+    try:
+        db_url = os.environ['DATABASE_URL']
+    except KeyError:
+        raise RuntimeError('Environmental variable "DATABASE_URL" is not set.')
+    engine = create_async_engine(url=db_url)
+    sessionmaker = async_sessionmaker(bind=engine, expire_on_commit=False)
+    app.bot_data['AsyncSession'] = sessionmaker
+
+
 def main():
     startup_options = get_startup_options()
 
@@ -59,27 +70,29 @@ def main():
 
     app = (ApplicationBuilder()
            .token(os.environ['BOT_TOKEN'])
-           .get_updates_http_version('2')
-           .http_version('2')
+           # .get_updates_http_version('2')
+           # .http_version('2')
            .defaults(Defaults(parse_mode=ParseMode.HTML))
            .rate_limiter(AIORateLimiter(max_retries=2))
            .post_init(app_post_init)
            .build())
+
+    # Give the bot access to startup options
+    app.bot_data['startup_options'] = startup_options
+
     setup_handlers(app)
+    setup_sqlalchemy(app)
 
-    engine = create_async_engine(url=os.environ['DATABASE_URL'])
-    sessionmaker = async_sessionmaker(bind=engine, expire_on_commit=False)
-    app.bot_data['AsyncSession'] = sessionmaker
-
+    # Run bot
     allowed_updates = [
         UpdateType.CHAT_MEMBER,
         UpdateType.CALLBACK_QUERY,
         UpdateType.MESSAGE,
     ]
-
     if startup_options.use_webhook:
-        raise NotImplementedError('Webhooks are not implemented yet')
-    app.run_polling(allowed_updates=allowed_updates)
+        app.run_webhook(allowed_updates=allowed_updates)
+    else:
+        app.run_polling(allowed_updates=allowed_updates)
 
 
 if __name__ == '__main__':
