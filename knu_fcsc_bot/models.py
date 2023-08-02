@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import String, BigInteger, ForeignKey
 from sqlalchemy.orm import (DeclarativeBase, Mapped, mapped_column,
                             relationship, MappedAsDataclass, )
@@ -61,3 +63,37 @@ class AbitChatInfo(Base):
         default_factory=list,
         lazy='raise'
     )
+
+
+class ChatMember(Base):
+    """A member of abit chat"""
+
+    __tablename__ = 'chat_members'
+
+    id: Mapped[int] = mapped_column(primary_key=True, init=False, default=None)
+    user_id: Mapped[int] = mapped_column(BigInteger)
+    chat_id: Mapped[int] = mapped_column(BigInteger,
+                                         ForeignKey('abit_chat_info.chat_id'),
+                                         autoincrement=False)
+
+    abit_chat: Mapped[AbitChatInfo] = relationship(lazy='raise')
+    pinguins: Mapped[list['SentPinguinRecord']] = relationship(
+        lazy=True,
+        back_populates='chat_member',
+    )
+
+
+class SentPinguinRecord(Base):
+    """Records sent pinguin gifs"""
+
+    __tablename__ = 'sent_pinguin_records'
+
+    id: Mapped[int] = mapped_column(primary_key=True, default=None, init=False)
+    timestamp: Mapped[datetime]
+    chat_member: Mapped[ChatMember] = relationship(
+        lazy=False,
+        back_populates='pinguins',
+    )
+
+    chat_member_id: Mapped[int] = mapped_column(ForeignKey('chat_members.id'),
+                                                default=None)
