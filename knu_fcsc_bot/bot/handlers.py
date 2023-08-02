@@ -26,25 +26,30 @@ def setup_handlers(app: Application) -> None:
     app.add_handler(ChatMemberHandler(
         callback=callbacks.chat_member_updated,
         chat_member_types=ChatMemberHandler.CHAT_MEMBER,
+        block=False,
     ))
 
     # Info menu actions
     app.add_handlers([
         CallbackQueryHandler(
             callback=callbacks.cd_programs,
-            pattern=r'^programs$'
+            pattern=r'^programs$',
+            block=False,
         ),
         CallbackQueryHandler(
             callback=callbacks.cd_program_by_id,
             pattern=r'^program_by_id:(?P<id>\d+)$',
+            block=False,
         ),
         CallbackQueryHandler(
             callback=callbacks.cd_main_menu,
             pattern=r'^main_menu$',
+            block=False,
         ),
         CallbackQueryHandler(
             callback=callbacks.cd_useful_links,
             pattern=r'^useful_links$',
+            block=False,
         ),
     ])
 
@@ -54,13 +59,16 @@ def setup_handlers(app: Application) -> None:
             command='info',
             callback=callbacks.cmd_info,
             filters=filters.ChatType.GROUPS,
+            block=False,
         ),
         CommandHandler(
             command='file_id',
             callback=callbacks.cmd_file_id,
+            block=False,
         ),
         CommandHandler(
             command='reload_filters',
             callback=callbacks.cmd_reload_filters,
+            block=False,
         )
     ])
