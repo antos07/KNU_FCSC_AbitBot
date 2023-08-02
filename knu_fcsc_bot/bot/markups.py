@@ -180,3 +180,10 @@ def get_display_file_id_markup(file_id: str) -> TextMarkup:
     return TextMarkup(
         text=f'file_id=<code>{html.escape(file_id)}</code>',
     )
+
+
+def get_filters_reloaded_markup() -> TextMarkup:
+    """A text message that notifies about successful filter reloading"""
+    return TextMarkup(
+        text='✅ Done'
+    )

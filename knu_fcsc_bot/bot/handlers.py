@@ -59,4 +59,8 @@ def setup_handlers(app: Application) -> None:
             command='file_id',
             callback=callbacks.cmd_file_id,
         ),
+        CommandHandler(
+            command='reload_filters',
+            callback=callbacks.cmd_reload_filters,
+        )
     ])

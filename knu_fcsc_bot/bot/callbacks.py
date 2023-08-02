@@ -12,6 +12,7 @@ from knu_fcsc_bot.bot.utils import (did_new_user_join,
                                     get_file_id, )
 
 DELETE_INFO_MENU_AFTER = timedelta(minutes=5)
+DELETE_DEV_MESSAGES_AFTER = timedelta(minutes=1)
 
 
 async def unhandled_exception(update: Update | object | None,
@@ -191,3 +192,34 @@ async def my_chat_member_updated(update: Update,
     if not did_new_user_join(update.my_chat_member):
         return
     logger.info(f'Bot is added to {update.effective_chat}')
+
+
+async def cmd_reload_filters(update: Update, context: CallbackContext) -> None:
+    """Reloads allowed chat filter by adding missing chats from the db"""
+    logger.debug('Reloading filters')
+
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        allowed_chat_ids = await usecases.list_allowed_chat_ids_usecase(
+            session=session,
+        )
+
+    # Adding allowed chat ids to the filter. Chat filter uses a set
+    # internally, so there is no need to check whether these chats
+    # were added before.
+    allowed_chat_filter = context.bot_data['allowed_chat_filter']
+    allowed_chat_filter.add_chat_ids(allowed_chat_ids)
+
+    logger.info(f'Updated allowed chats: {list(allowed_chat_filter.chat_ids)}')
+
+    markup = markups.get_filters_reloaded_markup()
+    replied_message = await update.effective_message.reply_text(
+        **markup.to_kwargs()
+    )
+
+    schedule_message_deletion(
+        job_queue=context.job_queue,
+        message=replied_message,
+        after=DELETE_DEV_MESSAGES_AFTER,
+        with_reply_to=True,
+    )
