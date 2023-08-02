@@ -176,9 +176,11 @@ def get_message_has_no_file_id_markup() -> TextMarkup:
     )
 
 
-def get_display_file_id_markup(file_id: str) -> TextMarkup:
+def get_display_file_id_markup(file_id: str,
+                               file_unique_id: str) -> TextMarkup:
     return TextMarkup(
-        text=f'file_id=<code>{html.escape(file_id)}</code>',
+        text=f'file_id=<code>{html.escape(file_id)}</code>\n'
+             f'file_unique_id=<code>{html.escape(file_unique_id)}</code>',
     )
 
 

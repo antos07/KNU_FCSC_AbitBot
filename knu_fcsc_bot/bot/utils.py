@@ -5,7 +5,7 @@ from functools import wraps
 from typing import Callable, Any, TypeAlias
 
 from loguru import logger
-from telegram import ChatMemberUpdated, ChatMember, Message, Update
+from telegram import ChatMemberUpdated, ChatMember, Message, Update, Animation
 from telegram.ext import JobQueue, CallbackContext
 
 
@@ -104,14 +104,27 @@ def reschedule_message_deletion_on_interaction(
     return decorator
 
 
-def get_file_id(message: Message) -> str | None:
-    """Gets file_id from message attachment. Returns None if none is given"""
+def get_file_id(message: Message) -> tuple[str, str] | None:
+    """Gets file_id and file_unique_id from message attachment. Returns None
+    if none is given"""
     attachment = message.effective_attachment
 
     with suppress(TypeError):
         # Assuming that dealing with an array of photo sizes
         max_size = sorted(attachment,
                           key=lambda ps: (ps.width * ps.height))[-1]
-        return max_size.file_id
+        return max_size.file_id, max_size.file_unique_id
 
-    return getattr(attachment, 'file_id', None)
+    try:
+        return attachment.file_id, attachment.file_unique_id
+    except AttributeError:
+        return None
+
+
+def is_a_pinguin_gif(animation: Animation) -> bool:
+    """Checks whether animation is a pinguin gif by its file_unique_id"""
+    pinguin_gif_file_unique_ids = {
+        'AQADfwADr7SkUnI',  # the ID recognized by @KNU_FCSC_AbitBot
+        'AgADfwADr7SkUg',  # the id recognized by my test bot
+    }
+    return animation.file_unique_id in pinguin_gif_file_unique_ids

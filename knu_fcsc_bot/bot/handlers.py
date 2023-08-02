@@ -72,3 +72,9 @@ def setup_handlers(app: Application) -> None:
             block=False,
         )
     ])
+
+    # Pinguin counter
+    app.add_handler(MessageHandler(
+        filters=filters.ANIMATION,
+        callback=callbacks.animation_message,
+    ))

@@ -1,9 +1,11 @@
+from datetime import datetime
 from typing import cast
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from knu_fcsc_bot.models import AbitChatInfo, UsefulLink, Program
+from knu_fcsc_bot.models import (AbitChatInfo, UsefulLink, Program, ChatMember,
+                                 SentPinguinRecord, )
 
 
 class Error(Exception):
@@ -55,3 +57,17 @@ async def list_allowed_chat_ids_usecase(session: AsyncSession) -> list[int]:
     stmt = select(AbitChatInfo.chat_id)
     scalar_results = await session.scalars(stmt)
     return list(scalar_results)
+
+
+async def record_pinguin_gif_usecase(session: AsyncSession, user_id: int,
+                                     chat_id: int,
+                                     timestamp: datetime) -> None:
+    """Records that user has sent the pinguin gif in chat"""
+    chat_member_stmt = select(ChatMember).where(ChatMember.user_id == user_id,
+                                                ChatMember.chat_id == chat_id)
+    chat_member = await session.scalar(chat_member_stmt)
+    pinguin_record = SentPinguinRecord(
+        chat_member=chat_member,
+        timestamp=timestamp,
+    )
+    session.add(pinguin_record)

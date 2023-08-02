@@ -9,7 +9,7 @@ from knu_fcsc_bot.bot import markups
 from knu_fcsc_bot.bot.utils import (did_new_user_join,
                                     schedule_message_deletion,
                                     reschedule_message_deletion_on_interaction,
-                                    get_file_id, )
+                                    get_file_id, is_a_pinguin_gif, )
 
 DELETE_INFO_MENU_AFTER = timedelta(minutes=5)
 DELETE_DEV_MESSAGES_AFTER = timedelta(minutes=1)
@@ -171,8 +171,9 @@ async def cmd_file_id(update: Update, context: CallbackContext) -> None:
     message = update.effective_message
     logger.info(f'{user} requested file_id of {message} in {chat}')
 
-    if file_id := get_file_id(message.reply_to_message):
-        markup = markups.get_display_file_id_markup(file_id)
+    file_id_tuple = get_file_id(message.reply_to_message)
+    if file_id_tuple:
+        markup = markups.get_display_file_id_markup(*file_id_tuple)
     else:
         markup = markups.get_message_has_no_file_id_markup()
     await message.reply_text(**markup.to_kwargs())
@@ -223,3 +224,27 @@ async def cmd_reload_filters(update: Update, context: CallbackContext) -> None:
         after=DELETE_DEV_MESSAGES_AFTER,
         with_reply_to=True,
     )
+
+
+async def animation_message(update: Update,
+                            context: CallbackContext) -> None:
+    """Records pinguin gifs in abit chats"""
+    animation = update.effective_message.animation
+    if not is_a_pinguin_gif(animation):
+        return
+
+    user = update.effective_user
+    chat = update.effective_chat
+    logger.info(f'{user} sent the pinguin gif in {chat}')
+
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        await usecases.record_pinguin_gif_usecase(
+            session=session,
+            user_id=user.id,
+            chat_id=chat.id,
+            timestamp=update.effective_message.date,
+        )
+        await session.commit()
+
+    logger.debug(f'Recorded a pinguin from {user} in {chat}')
