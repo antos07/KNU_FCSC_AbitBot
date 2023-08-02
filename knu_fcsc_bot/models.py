@@ -72,14 +72,16 @@ class ChatMember(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False, default=None)
     user_id: Mapped[int] = mapped_column(BigInteger)
+    abit_chat: Mapped[AbitChatInfo] = relationship(lazy='raise')
     chat_id: Mapped[int] = mapped_column(BigInteger,
                                          ForeignKey('abit_chat_info.chat_id'),
-                                         autoincrement=False)
+                                         autoincrement=False,
+                                         default=None)
 
-    abit_chat: Mapped[AbitChatInfo] = relationship(lazy='raise')
     pinguins: Mapped[list['SentPinguinRecord']] = relationship(
         lazy=True,
         back_populates='chat_member',
+        default_factory=list,
     )
 
     __table_args__ = (

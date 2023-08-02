@@ -1,4 +1,4 @@
-from sqlalchemy import Update
+from telegram import Update
 from telegram.ext import (Application, ChatMemberHandler, CallbackQueryHandler,
                           CommandHandler, filters, MessageHandler,
                           TypeHandler, )
