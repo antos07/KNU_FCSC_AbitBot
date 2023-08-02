@@ -150,9 +150,9 @@ def get_useful_link_list_markup(useful_links: list[UsefulLink],
                                 requested_by: User) -> PhotoMarkup:
     """Builds a text message with useful links as inline buttons"""
     markup = PhotoMarkup()
-    markup.text = (f'<b>[📖Інформаційна довідка</b> для '
-                   f'{requested_by.mention_html()}<b>]</b>\n\n'
-                   f'📎 Корисні посилання:')
+    markup.caption = (f'<b>[📖Інформаційна довідка</b> для '
+                      f'{requested_by.mention_html()}<b>]</b>\n\n'
+                      f'📎 Корисні посилання:')
     buttons = [
         InlineKeyboardButton(
             text=link.title,
