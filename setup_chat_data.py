@@ -16,6 +16,8 @@ with Session(bind=engine) as session:
                        url='https://vstup.knu.ua/images/2023/%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D0%B0_%D0%BF%D1%80%D0%B8%D0%B9%D0%BE%D0%BC%D1%8318.07.pdf'),
             UsefulLink(title='📝 ПРИКЛАД МОТИВАЦІЙНОГО',
                        url='https://t.me/knu_vstup/1370'),
+            UsefulLink(title='🎒 ПОДАЧА ДОКУМЕНТІВ',
+                       url='https://t.me/abit_cyber_2023/7482'),
             UsefulLink(title='⚙️ Гайд',
                        url='https://telegra.ph/Gajdi-z%D1%96-spec%D1%96alnostej-FKNK-06-10-3'),
             UsefulLink(title='💻 Сайт ФКНК', url='https://csc.knu.ua/uk/'),
@@ -36,7 +38,7 @@ with Session(bind=engine) as session:
             Program(title='🔸Системний аналіз (124)',
                     guide_url='https://telegra.ph/Vse-shcho-vam-treba-znati-pro-Sistemnij-anal%D1%96z-06-01'),
         ],
-        greeting_photo_file_id='AgACAgIAAxkBAAIFrmTGyc6UgGhTHiPyLQ5FUJUOfMttAAKUxzEbhjZAS5JoZuST6gOeAQADAgADeQADLwQ'
+        greeting_photo_file_id='AgACAgIAAxkBAAMQZMlfgv77cuA600hoN7Fr1dJf5IAAAtbLMRtIm0hKKYMrr1jAgzgBAAMCAAN5AAMvBA'
     )
     session.add(info)
     session.commit()
