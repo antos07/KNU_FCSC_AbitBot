@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import String, BigInteger, ForeignKey
+from sqlalchemy import String, BigInteger, ForeignKey, Index
 from sqlalchemy.orm import (DeclarativeBase, Mapped, mapped_column,
                             relationship, MappedAsDataclass, )
 
@@ -80,6 +80,11 @@ class ChatMember(Base):
     pinguins: Mapped[list['SentPinguinRecord']] = relationship(
         lazy=True,
         back_populates='chat_member',
+    )
+
+    __table_args__ = (
+        Index('ix_chat_members__user_id__chat_id', 'user_id',
+              'chat_id'),
     )
 
 
