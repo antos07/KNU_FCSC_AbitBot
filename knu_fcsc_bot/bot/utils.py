@@ -48,7 +48,7 @@ def schedule_message_deletion(
     async def delete_message(context: CallbackContext) -> None:
         await message.delete()
         logger.info(f'Deleted {message}')
-        if with_reply_to:
+        if context.job:
             await message.reply_to_message.delete()
             logger.info(f'Deleted {message.reply_to_message}')
 
@@ -63,8 +63,10 @@ def schedule_message_deletion(
         name=f'delete_message:{message.message_id}',
         chat_id=message.chat_id,
         user_id=user_id,
+        data={'with_reply_to': with_reply_to},
     )
-    logger.debug(f'Scheduled {message} for deletion at {job.next_t}')
+    logger.debug(f'Scheduled {message} for deletion ({with_reply_to=}) at'
+                 f' {job.next_t}')
 
 
 _Callback: TypeAlias = Callable[[Update, CallbackContext], Any]
@@ -76,6 +78,7 @@ def reschedule_message_deletion_on_interaction(
 ) -> _CallbackDecorator:
     """A decorator for a callback query handler callback function. Reschedules
     the message from the update to be deleted after `delete_after`"""
+
     def decorator(wrapped: _Callback) -> _Callback:
         @wraps(wrapped)
         async def wrapper(update: Update, context: CallbackContext) -> Any:
@@ -90,7 +93,9 @@ def reschedule_message_deletion_on_interaction(
                 job.schedule_removal()
 
             # Scheduling new job
-            schedule_message_deletion(job_queue, message, delete_after)
+            with_reply_to = any(job.data['with_reply_to'] for job in old_jobs)
+            schedule_message_deletion(job_queue, message, delete_after,
+                                      with_reply_to=with_reply_to)
 
             return await wrapped(update, context)
 
