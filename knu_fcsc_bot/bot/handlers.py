@@ -1,5 +1,7 @@
+from sqlalchemy import Update
 from telegram.ext import (Application, ChatMemberHandler, CallbackQueryHandler,
-                          CommandHandler, filters, MessageHandler, )
+                          CommandHandler, filters, MessageHandler,
+                          TypeHandler, )
 
 from knu_fcsc_bot.bot import callbacks
 
@@ -7,6 +9,14 @@ from knu_fcsc_bot.bot import callbacks
 def setup_handlers(app: Application) -> None:
     """Setup handlers for the given application"""
     app.add_error_handler(callback=callbacks.unhandled_exception)
+
+    # Record chat members before any other handler, but using
+    # a lower group to allow this update to be handled by other
+    # handlers.
+    app.add_handler(TypeHandler(
+        type=Update,
+        callback=callbacks.chat_member_recorder,
+    ), group=-1)
 
     # Skip messages from all chats, except allowed chats
     allowed_chat_filter = filters.Chat()

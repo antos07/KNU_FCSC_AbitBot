@@ -71,3 +71,19 @@ async def record_pinguin_gif_usecase(session: AsyncSession, user_id: int,
         timestamp=timestamp,
     )
     session.add(pinguin_record)
+
+
+async def record_chat_member(session: AsyncSession, user_id: int,
+                             chat_id: int) -> None:
+    """Records that the user is a member of the chat"""
+    chat = await session.get(AbitChatInfo, chat_id)
+    if not chat:
+        raise DoesNotExist('No chat with the given id')
+    chat_member_stmt = select(ChatMember).where(ChatMember.user_id == user_id,
+                                                ChatMember.abit_chat == chat)
+    chat_member = await session.scalar(chat_member_stmt)
+    if chat_member:
+        # The user has been already recorded as the chat member
+        return
+    chat_member = ChatMember(user_id=user_id, abit_chat=chat)
+    session.add(chat_member)

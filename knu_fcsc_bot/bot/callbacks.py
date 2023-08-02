@@ -1,3 +1,4 @@
+from contextlib import suppress
 from datetime import timedelta
 
 from loguru import logger
@@ -248,3 +249,21 @@ async def animation_message(update: Update,
         await session.commit()
 
     logger.debug(f'Recorded a pinguin from {user} in {chat}')
+
+
+async def chat_member_recorder(update: Update,
+                               context: CallbackContext) -> None:
+    """Saves the user as chat member of the corresponding chat"""
+    chat = update.effective_chat
+    user = update.effective_user
+    if not chat or not user:
+        # Can not determine the member of the chat
+        return
+
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        with suppress(usecases.DoesNotExist):
+            await usecases.record_chat_member(session, user.id, chat.id)
+        await session.commit()
+
+    logger.debug(f'Recorded {user} as a member of {chat}')

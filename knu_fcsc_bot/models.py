@@ -84,7 +84,7 @@ class ChatMember(Base):
 
     __table_args__ = (
         Index('ix_chat_members__user_id__chat_id', 'user_id',
-              'chat_id'),
+              'chat_id', unique=True),
     )
 
 
