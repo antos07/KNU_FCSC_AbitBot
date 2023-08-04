@@ -80,7 +80,12 @@ def setup_handlers(app: Application) -> None:
             command='reload_filters',
             callback=callbacks.cmd_reload_filters,
             block=False,
-        )
+        ),
+        CommandHandler(
+            command='top_penguins',
+            callback=callbacks.cmd_top_penguins,
+            block=False,
+        ),
     ])
 
     # Pinguin counter

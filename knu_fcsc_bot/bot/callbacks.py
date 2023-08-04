@@ -267,3 +267,28 @@ async def chat_member_recorder(update: Update,
         await session.commit()
 
     logger.debug(f'Recorded {user} as a member of {chat}')
+
+
+async def cmd_top_penguins(update: Update, context: CallbackContext) -> None:
+    """Displays the Top 10 users with the most sent penguin gifs"""
+    user = update.effective_user
+    chat = update.effective_chat
+    logger.info(f'{user} requested top 10 penguins in {chat}')
+
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        top10 = await usecases.top_users_with_most_sent_penguins_usecase(
+            session=session, chat_id=chat.id)
+    # Getting an actual chat member for each user_id
+    top10 = (
+        (await chat.get_member(user_id), pinguin_count)
+        for user_id, pinguin_count in top10
+    )
+    # Building a list of markups.UserPenguinCount
+    top10 = [
+        markups.UserPenguinCount(chat_member.user, penguin_count)
+        async for chat_member, penguin_count in top10
+    ]
+
+    markup = markups.get_top10_users_by_sent_penguins_markup(top10)
+    await update.effective_message.reply_text(**markup.to_kwargs())

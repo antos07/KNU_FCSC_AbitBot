@@ -1,6 +1,6 @@
 import html
 from dataclasses import dataclass, asdict
-from typing import Any
+from typing import Any, NamedTuple
 
 from telegram import (User, InlineKeyboardMarkup, InlineKeyboardButton,
                       PhotoSize, )
@@ -189,3 +189,30 @@ def get_filters_reloaded_markup() -> TextMarkup:
     return TextMarkup(
         text='✅ Done'
     )
+
+
+class UserPenguinCount(NamedTuple):
+    user: User
+    penguin_count: int
+
+
+def get_top10_users_by_sent_penguins_markup(
+        top10: list[UserPenguinCount],
+) -> TextMarkup:
+    """A text message with a list of the top 10 users by their sent
+    penguins count. `top10` is assumed to be in descending order."""
+    markup = TextMarkup()
+
+    top3_emoji = '🥇🥈🥉'
+    top3_lines = [
+        f'{medal_emoji} {user.mention_html()} — {penguin_count}'
+        for medal_emoji, (user, penguin_count) in zip(top3_emoji, top10[:3])
+    ]
+    rest_lines = [
+        f'{i}. {user.mention_html()} — {penguin_count}'
+        for i, (user, penguin_count) in enumerate(top10[3:], start=4)
+    ]
+    top10_lines = top3_lines + rest_lines
+    markup.text = ('🏆🐧 Топ 10 відправників пінгвінчиків:\n\n'
+                   + '\n'.join(top10_lines))
+    return markup

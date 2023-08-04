@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import cast
+from typing import cast, NamedTuple
 
-from sqlalchemy import select
+from sqlalchemy import select, func, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from knu_fcsc_bot.models import (AbitChatInfo, UsefulLink, Program, ChatMember,
@@ -87,3 +87,50 @@ async def record_chat_member(session: AsyncSession, user_id: int,
         return
     chat_member = ChatMember(user_id=user_id, abit_chat=chat)
     session.add(chat_member)
+
+
+class UserPenguinCount(NamedTuple):
+    """The number of penguins sent by a user with user_id"""
+    user_id: int
+    penguin_count: int
+
+
+async def top_users_with_most_sent_penguins_usecase(
+        session: AsyncSession,
+        chat_id: int,
+        number: int = 10,
+        since: datetime | None = None,
+        until: datetime | None = None,
+) -> list[UserPenguinCount]:
+    """
+    Returns top users with the most sent penguins in given chat.
+
+    If number is not specified, returns the Top 10.
+
+    If since is not specified, counts from the beginning of the time.
+
+    If until is not specified, counts till now.
+    """
+    # Joining ChatMember.pinguins, so to count pinguins its enough
+    # to count user_id entries, as there will be an entry for every
+    # SentPinguinRecord.
+    penguin_count = func.count(ChatMember.user_id).label('penguin_count')
+    stmt = (
+        select(ChatMember.user_id, penguin_count)
+        .where(ChatMember.chat_id == chat_id)
+        .join(ChatMember.pinguins)
+        .group_by(ChatMember.user_id)
+        .order_by(desc(penguin_count))
+        .limit(number)
+    )
+    if since:
+        stmt = stmt.where(SentPinguinRecord.timestamp >= since)
+    if until:
+        stmt = stmt.where(SentPinguinRecord.timestamp <= until)
+
+    results = await session.execute(stmt)
+
+    return [
+        UserPenguinCount(user_id, penguin_count)
+        for user_id, penguin_count in results.tuples()
+    ]
