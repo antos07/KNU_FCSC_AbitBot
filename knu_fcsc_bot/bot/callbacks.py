@@ -15,6 +15,7 @@ from knu_fcsc_bot.bot.utils import (did_new_user_join,
 
 DELETE_INFO_MENU_AFTER = timedelta(minutes=5)
 DELETE_DEV_MESSAGES_AFTER = timedelta(minutes=1)
+DELETE_MISC_MESSAGE_AFTER = timedelta(minutes=3)
 
 
 async def unhandled_exception(update: Update | object | None,
@@ -290,4 +291,13 @@ async def cmd_top_penguins(update: Update, context: CallbackContext) -> None:
     ]
 
     markup = markups.get_top10_users_by_sent_penguins_markup(top10)
-    await update.effective_message.reply_text(**markup.to_kwargs())
+    sent_message = await update.effective_message.reply_text(
+        **markup.to_kwargs()
+    )
+
+    schedule_message_deletion(
+        job_queue=context.job_queue,
+        message=sent_message,
+        after=DELETE_MISC_MESSAGE_AFTER,
+        with_reply_to=True,
+    )
