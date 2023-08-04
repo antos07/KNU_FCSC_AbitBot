@@ -10,7 +10,8 @@ from knu_fcsc_bot.bot import markups
 from knu_fcsc_bot.bot.utils import (did_new_user_join,
                                     schedule_message_deletion,
                                     reschedule_message_deletion_on_interaction,
-                                    get_file_id, is_a_penguin_gif, )
+                                    get_file_id, is_a_penguin_gif,
+                                    get_cached_chat_member, )
 
 DELETE_INFO_MENU_AFTER = timedelta(minutes=5)
 DELETE_DEV_MESSAGES_AFTER = timedelta(minutes=1)
@@ -279,7 +280,7 @@ async def cmd_top_penguins(update: Update, context: CallbackContext) -> None:
             session=session, chat_id=chat.id)
     # Getting an actual chat member for each user_id
     top10 = (
-        (await chat.get_member(user_id), penguin_count)
+        (await get_cached_chat_member(chat, user_id), penguin_count)
         for user_id, penguin_count in top10
     )
     # Building a list of markups.UserPenguinCount

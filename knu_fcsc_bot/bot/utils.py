@@ -1,11 +1,12 @@
-import typing
 from contextlib import suppress
-from datetime import timedelta
+from datetime import timedelta, datetime
 from functools import wraps
 from typing import Callable, Any, TypeAlias
 
 from loguru import logger
-from telegram import ChatMemberUpdated, ChatMember, Message, Update, Animation
+from telegram import (ChatMemberUpdated, ChatMember, Message, Update,
+                      Animation,
+                      Chat, )
 from telegram.ext import JobQueue, CallbackContext
 
 
@@ -128,3 +129,33 @@ def is_a_penguin_gif(animation: Animation) -> bool:
         'AgADfwADr7SkUg',  # the id recognized by my test bot
     }
     return animation.file_unique_id in penguin_gif_file_unique_ids
+
+
+class _GetCachedChatMember:
+    """A wrapper around bot.get_chat_members that caches chat members
+        for an hour"""
+
+    DEFAULT_TIME_TO_LEAVE = timedelta(hours=1)
+
+    def __init__(self, time_to_live: timedelta = DEFAULT_TIME_TO_LEAVE):
+        self.time_to_live = time_to_live
+        self.cache: dict[tuple[int, int], tuple[datetime, ChatMember]] = {}
+
+    async def __call__(self, chat: Chat, user_id: int) -> ChatMember:
+        try:
+            self._remove_from_cache_if_expired(chat.id, user_id)
+            return self.cache[chat.id, user_id][1]
+        except KeyError:  # Not in cache
+            chat_member = await chat.get_member(user_id)
+            self.cache[chat.id, user_id] = datetime.now(), chat_member
+            return chat_member
+
+    def _remove_from_cache_if_expired(self, chat_id: int,
+                                      user_id: int) -> None:
+        """Removes from cache if the cached value has expired"""
+        timestamp, _ = self.cache[chat_id, user_id]
+        if timestamp + self.time_to_live < datetime.now():
+            del self.cache[chat_id, user_id]
+
+
+get_cached_chat_member = _GetCachedChatMember()
