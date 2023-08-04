@@ -205,11 +205,11 @@ def get_top10_users_by_sent_penguins_markup(
 
     top3_emoji = '🥇🥈🥉'
     top3_lines = [
-        f'{medal_emoji} {user.mention_html()} — {penguin_count}'
+        f'{medal_emoji} {user.full_name} — {penguin_count}'
         for medal_emoji, (user, penguin_count) in zip(top3_emoji, top10[:3])
     ]
     rest_lines = [
-        f'{i}. {user.mention_html()} — {penguin_count}'
+        f'{i}. {user.full_name} — {penguin_count}'
         for i, (user, penguin_count) in enumerate(top10[3:], start=4)
     ]
     top10_lines = top3_lines + rest_lines
