@@ -10,7 +10,7 @@ from knu_fcsc_bot.bot import markups
 from knu_fcsc_bot.bot.utils import (did_new_user_join,
                                     schedule_message_deletion,
                                     reschedule_message_deletion_on_interaction,
-                                    get_file_id, is_a_pinguin_gif, )
+                                    get_file_id, is_a_penguin_gif, )
 
 DELETE_INFO_MENU_AFTER = timedelta(minutes=5)
 DELETE_DEV_MESSAGES_AFTER = timedelta(minutes=1)
@@ -229,26 +229,24 @@ async def cmd_reload_filters(update: Update, context: CallbackContext) -> None:
 
 async def animation_message(update: Update,
                             context: CallbackContext) -> None:
-    """Records pinguin gifs in abit chats"""
+    """Records penguin gifs in abit chats"""
     animation = update.effective_message.animation
-    if not is_a_pinguin_gif(animation):
+    if not is_a_penguin_gif(animation):
         return
 
     user = update.effective_user
     chat = update.effective_chat
-    logger.info(f'{user} sent the pinguin gif in {chat}')
+    logger.info(f'{user} sent the penguin gif in {chat}')
 
     session = context.bot_data['AsyncSession']()
     async with session:
-        await usecases.record_pinguin_gif_usecase(
-            session=session,
-            user_id=user.id,
-            chat_id=chat.id,
-            timestamp=update.effective_message.date,
-        )
+        await usecases.record_penguin_gif_usecase(session=session,
+                                                  user_id=user.id,
+                                                  chat_id=chat.id,
+                                                  timestamp=update.effective_message.date)
         await session.commit()
 
-    logger.debug(f'Recorded a pinguin from {user} in {chat}')
+    logger.debug(f'Recorded a penguin from {user} in {chat}')
 
 
 async def chat_member_recorder(update: Update,
@@ -281,8 +279,8 @@ async def cmd_top_penguins(update: Update, context: CallbackContext) -> None:
             session=session, chat_id=chat.id)
     # Getting an actual chat member for each user_id
     top10 = (
-        (await chat.get_member(user_id), pinguin_count)
-        for user_id, pinguin_count in top10
+        (await chat.get_member(user_id), penguin_count)
+        for user_id, penguin_count in top10
     )
     # Building a list of markups.UserPenguinCount
     top10 = [

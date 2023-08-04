@@ -121,10 +121,10 @@ def get_file_id(message: Message) -> tuple[str, str] | None:
         return None
 
 
-def is_a_pinguin_gif(animation: Animation) -> bool:
-    """Checks whether animation is a pinguin gif by its file_unique_id"""
-    pinguin_gif_file_unique_ids = {
+def is_a_penguin_gif(animation: Animation) -> bool:
+    """Checks whether animation is a penguin gif by its file_unique_id"""
+    penguin_gif_file_unique_ids = {
         'AQADfwADr7SkUnI',  # the ID recognized by @KNU_FCSC_AbitBot
         'AgADfwADr7SkUg',  # the id recognized by my test bot
     }
-    return animation.file_unique_id in pinguin_gif_file_unique_ids
+    return animation.file_unique_id in penguin_gif_file_unique_ids

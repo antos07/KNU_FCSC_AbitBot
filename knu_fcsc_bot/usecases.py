@@ -5,7 +5,7 @@ from sqlalchemy import select, func, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from knu_fcsc_bot.models import (AbitChatInfo, UsefulLink, Program, ChatMember,
-                                 SentPinguinRecord, )
+                                 SentPenguinRecord, )
 
 
 class Error(Exception):
@@ -59,18 +59,18 @@ async def list_allowed_chat_ids_usecase(session: AsyncSession) -> list[int]:
     return list(scalar_results)
 
 
-async def record_pinguin_gif_usecase(session: AsyncSession, user_id: int,
+async def record_penguin_gif_usecase(session: AsyncSession, user_id: int,
                                      chat_id: int,
                                      timestamp: datetime) -> None:
-    """Records that user has sent the pinguin gif in chat"""
+    """Records that user has sent the penguin gif in chat"""
     chat_member_stmt = select(ChatMember).where(ChatMember.user_id == user_id,
                                                 ChatMember.chat_id == chat_id)
     chat_member = await session.scalar(chat_member_stmt)
-    pinguin_record = SentPinguinRecord(
+    penguin_record = SentPenguinRecord(
         chat_member=chat_member,
         timestamp=timestamp,
     )
-    session.add(pinguin_record)
+    session.add(penguin_record)
 
 
 async def record_chat_member(session: AsyncSession, user_id: int,
@@ -111,22 +111,22 @@ async def top_users_with_most_sent_penguins_usecase(
 
     If until is not specified, counts till now.
     """
-    # Joining ChatMember.pinguins, so to count pinguins its enough
+    # Joining ChatMember.penguins, so to count penguins its enough
     # to count user_id entries, as there will be an entry for every
-    # SentPinguinRecord.
+    # SentPenguinRecord.
     penguin_count = func.count(ChatMember.user_id).label('penguin_count')
     stmt = (
         select(ChatMember.user_id, penguin_count)
         .where(ChatMember.chat_id == chat_id)
-        .join(ChatMember.pinguins)
+        .join(ChatMember.penguins)
         .group_by(ChatMember.user_id)
         .order_by(desc(penguin_count))
         .limit(number)
     )
     if since:
-        stmt = stmt.where(SentPinguinRecord.timestamp >= since)
+        stmt = stmt.where(SentPenguinRecord.timestamp >= since)
     if until:
-        stmt = stmt.where(SentPinguinRecord.timestamp <= until)
+        stmt = stmt.where(SentPenguinRecord.timestamp <= until)
 
     results = await session.execute(stmt)
 

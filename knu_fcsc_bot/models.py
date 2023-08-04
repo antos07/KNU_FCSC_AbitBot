@@ -78,7 +78,7 @@ class ChatMember(Base):
                                          autoincrement=False,
                                          default=None)
 
-    pinguins: Mapped[list['SentPinguinRecord']] = relationship(
+    penguins: Mapped[list['SentPenguinRecord']] = relationship(
         lazy=True,
         back_populates='chat_member',
         default_factory=list,
@@ -90,16 +90,16 @@ class ChatMember(Base):
     )
 
 
-class SentPinguinRecord(Base):
-    """Records sent pinguin gifs"""
+class SentPenguinRecord(Base):
+    """Records sent penguin gifs"""
 
-    __tablename__ = 'sent_pinguin_records'
+    __tablename__ = 'sent_penguin_records'
 
     id: Mapped[int] = mapped_column(primary_key=True, default=None, init=False)
     timestamp: Mapped[datetime]
     chat_member: Mapped[ChatMember] = relationship(
         lazy=False,
-        back_populates='pinguins',
+        back_populates='penguins',
     )
 
     chat_member_id: Mapped[int] = mapped_column(ForeignKey('chat_members.id'),
