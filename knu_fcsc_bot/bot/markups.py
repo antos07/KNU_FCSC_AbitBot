@@ -1,14 +1,17 @@
+import datetime
 import html
 from dataclasses import dataclass, asdict
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Protocol
 
+from dateutil.tz import gettz
 from telegram import (User, InlineKeyboardMarkup, InlineKeyboardButton,
                       PhotoSize, )
 from telegram._utils.types import ReplyMarkup, FileInput
 
 from knu_fcsc_bot.models import (AbitChatInfo, Program, UsefulLink,
-                                 AdmissionCommitteInfo,
-                                 AdmissionCommitteTimetableRecord, )
+                                 AdmissionCommitteInfo, )
+
+KYIV_TZ = gettz('Europe/Kyiv')
 
 
 @dataclass
@@ -230,14 +233,49 @@ def get_top10_users_by_sent_penguins_markup(
     return markup
 
 
-def _build_admission_committe_timetable_text(
-        timetable: list[AdmissionCommitteTimetableRecord],
+class TimetableRecord(Protocol):
+    """A generic timetable record protocol"""
+
+    date: datetime.date
+    work_start: datetime.time
+    work_end: datetime.time
+
+
+def _choose_timetable_record_emoji(record: TimetableRecord) -> str:
+    """Returns an emoji base on the date.
+
+    ✅ for passed days
+    🔴 for the actual date
+    ☑ for next dates
+    """
+    passed_record = '✅'
+    actual_record = '🔴'
+    future_record = '☑'
+
+    now = datetime.datetime.now(tz=KYIV_TZ)
+    if record.date < now.date():
+        return passed_record
+    if record.date == now.date():
+        if now.time() < record.work_start:
+            return future_record
+        if record.work_end < now.time():
+            return passed_record
+        return actual_record
+    return future_record
+
+
+def _build_timetable_text(
+        timetable: list[TimetableRecord],
 ) -> str:
     """Builds a timetable text"""
-    timetable_record_format = ('{record.date:%d.%m} {record.work_start:%H:%M}-'
+    timetable_record_format = ('{emoji} {record.date:%d.%m} '
+                               '{record.work_start:%H:%M}-'
                                '{record.work_end:%H:%M}')
     timetable_lines = [
-        timetable_record_format.format(record=record)
+        timetable_record_format.format(
+            record=record,
+            emoji=_choose_timetable_record_emoji(record),
+        )
         for record in timetable
     ]
     return '\n'.join(timetable_lines)
@@ -256,9 +294,8 @@ def get_admission_committe_info_markup(
                       f'{requested_by.mention_html()}<b>]</b>\n\n'
                       f'🏫 Прийомна комісія\n\n'
                       f'Розклад:\n')
-    markup.caption += _build_admission_committe_timetable_text(
-        timetable=admission_committe_info.timetable
-    )
+    markup.caption += _build_timetable_text(
+        timetable=admission_committe_info.timetable)
     buttons = []
     if admission_committe_info.queue_url:
         buttons.append(InlineKeyboardButton(
