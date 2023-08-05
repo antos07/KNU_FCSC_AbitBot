@@ -117,13 +117,14 @@ class AdmissionCommitteTimetableRecord(Base):
 
     __tablename__ = 'admission_committe_timetable'
 
+    id: Mapped[int] = mapped_column(primary_key=True, init=False,
+                                    default=None)
     date: Mapped[datetime.date]
     work_start: Mapped[datetime.time]
     work_end: Mapped[datetime.time]
     committe_chat_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey('admission_committe_info.chat_id'),
-        primary_key=True,
         autoincrement=False,
         default=None,
     )
