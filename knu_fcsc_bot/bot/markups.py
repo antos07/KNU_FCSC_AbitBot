@@ -6,7 +6,9 @@ from telegram import (User, InlineKeyboardMarkup, InlineKeyboardButton,
                       PhotoSize, )
 from telegram._utils.types import ReplyMarkup, FileInput
 
-from knu_fcsc_bot.models import AbitChatInfo, Program, UsefulLink
+from knu_fcsc_bot.models import (AbitChatInfo, Program, UsefulLink,
+                                 AdmissionCommitteInfo,
+                                 AdmissionCommitteTimetableRecord, )
 
 
 @dataclass
@@ -54,11 +56,20 @@ class AlertMarkup(BaseMarkup):
 def _build_main_page_of_info_menu_reply_markup(
         abit_chat_info: AbitChatInfo
 ) -> ReplyMarkup:
-    return InlineKeyboardMarkup.from_column([
+    button_column = [
         InlineKeyboardButton(
             text='🎓 Освітні програми',
             callback_data='programs',
         ),
+    ]
+    if abit_chat_info.admission_committe_info:
+        button_column += [
+            InlineKeyboardButton(
+                text='🏫 Прийомна комісія',
+                callback_data='admission_committe',
+            ),
+        ]
+    button_column += [
         InlineKeyboardButton(
             text='📎 Корисні посилання',
             callback_data='useful_links',
@@ -67,7 +78,8 @@ def _build_main_page_of_info_menu_reply_markup(
             text='🗑 Флудилка',
             url=abit_chat_info.flood_chat_link,
         ),
-    ])
+    ]
+    return InlineKeyboardMarkup.from_column(button_column)
 
 
 def get_new_user_greeting_markup(abit_chat_info: AbitChatInfo,
@@ -215,4 +227,60 @@ def get_top10_users_by_sent_penguins_markup(
     top10_lines = top3_lines + rest_lines
     markup.text = ('🏆🐧 Топ 10 відправників пінгвінчиків:\n\n'
                    + '\n'.join(top10_lines))
+    return markup
+
+
+def _build_admission_committe_timetable_text(
+        timetable: list[AdmissionCommitteTimetableRecord],
+) -> str:
+    """Builds a timetable text"""
+    timetable_record_format = ('{record.date:%d.%m} {record.start_time:%H:%M}-'
+                               '{record.end_time:%H:%M}}')
+    timetable_lines = [
+        timetable_record_format.format(record=record)
+        for record in timetable
+    ]
+    return '\n'.join(timetable_lines)
+
+
+def get_admission_committe_info_markup(
+        admission_committe_info: AdmissionCommitteInfo,
+        requested_by: User,
+) -> PhotoMarkup:
+    """A photo message with the committe timetable in its caption
+    and online queue, required documents and "how to find?" links as
+    inline buttons"""
+    markup = PhotoMarkup()
+    markup.photo = admission_committe_info.chat.greeting_photo_file_id
+    markup.caption = (f'<b>[📖Інформаційна довідка</b> для '
+                      f'{requested_by.mention_html()}<b>]</b>\n\n'
+                      f'🏫 Прийомна комісія\n\n'
+                      f'Розклад:\n')
+    markup.caption += _build_admission_committe_timetable_text(
+        timetable=admission_committe_info.timetable
+    )
+    buttons = []
+    if admission_committe_info.queue_url:
+        buttons.append(InlineKeyboardButton(
+            text='🕒 ЕЛЕКТРОННА ЧЕРГА',
+            url=admission_committe_info.queue_url,
+        ))
+    if admission_committe_info.required_documents_url:
+        buttons.append(InlineKeyboardButton(
+            text='📂 НЕОБХІДНІ ДОКУМЕНТИ',
+            url=admission_committe_info.required_documents_url,
+        ))
+    buttons += [
+        InlineKeyboardButton(
+            text='🗺️📌 Як нас знайти?',
+            url='https://goo.gl/maps/yH3CN9Quy7DEruvg7',
+        ),
+        InlineKeyboardButton(
+            text='🔙 Назад',
+            callback_data='main_menu'
+        ),
+    ]
+    markup.reply_markup = InlineKeyboardMarkup.from_column(
+        button_column=buttons,
+    )
     return markup

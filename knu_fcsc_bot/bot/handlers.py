@@ -61,6 +61,11 @@ def setup_handlers(app: Application) -> None:
             pattern=r'^useful_links$',
             block=False,
         ),
+        CallbackQueryHandler(
+            callback=callbacks.cd_admission_committe,
+            pattern=r'^admission_committe$',
+            block=False,
+        ),
     ])
 
     # Commands

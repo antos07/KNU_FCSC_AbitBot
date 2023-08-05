@@ -3,9 +3,10 @@ from typing import cast, NamedTuple
 
 from sqlalchemy import select, func, desc
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from knu_fcsc_bot.models import (AbitChatInfo, UsefulLink, Program, ChatMember,
-                                 SentPenguinRecord, )
+                                 SentPenguinRecord, AdmissionCommitteInfo, )
 
 
 class Error(Exception):
@@ -22,7 +23,15 @@ async def get_main_abit_chat_info_usecase(session: AsyncSession,
     """Returns main info for given chat_id (useful_links and programs
     are not guarantied)"""
     abit_chat_info = cast(AbitChatInfo,
-                          await session.get(AbitChatInfo, chat_id))
+                          await session.get(
+                              entity=AbitChatInfo,
+                              ident=chat_id,
+                              options=[
+                                  selectinload(
+                                      AbitChatInfo.admission_committe_info
+                                  ),
+                              ],
+                          ))
     if not abit_chat_info:
         raise DoesNotExist
     return abit_chat_info
@@ -134,3 +143,21 @@ async def top_users_with_most_sent_penguins_usecase(
         UserPenguinCount(user_id, penguin_count)
         for user_id, penguin_count in results.tuples()
     ]
+
+
+async def get_admission_committe_info_usecase(
+        session: AsyncSession,
+        chat_id: int,
+) -> AdmissionCommitteInfo:
+    """Returns the info about the admission for te given chat_id"""
+    admission_committe_info = await session.get(
+        entity=AdmissionCommitteInfo,
+        ident=chat_id,
+        options=[
+            selectinload(AdmissionCommitteInfo.timetable),
+            selectinload(AdmissionCommitteInfo.chat),
+        ],
+    )
+    if not admission_committe_info:
+        raise DoesNotExist
+    return cast(AdmissionCommitteInfo, admission_committe_info)

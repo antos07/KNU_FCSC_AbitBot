@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from sqlalchemy import String, BigInteger, ForeignKey, Index
 from sqlalchemy.orm import (DeclarativeBase, Mapped, mapped_column,
@@ -63,6 +63,12 @@ class AbitChatInfo(Base):
         default_factory=list,
         lazy='raise'
     )
+    admission_committe_info: Mapped[
+        'AdmissionCommitteInfo | None'] = relationship(
+        back_populates='chat',
+        uselist=False,
+        default=None,
+    )
 
 
 class ChatMember(Base):
@@ -96,7 +102,7 @@ class SentPenguinRecord(Base):
     __tablename__ = 'sent_penguin_records'
 
     id: Mapped[int] = mapped_column(primary_key=True, default=None, init=False)
-    timestamp: Mapped[datetime]
+    timestamp: Mapped[datetime.datetime]
     chat_member: Mapped[ChatMember] = relationship(
         lazy=False,
         back_populates='penguins',
@@ -104,3 +110,49 @@ class SentPenguinRecord(Base):
 
     chat_member_id: Mapped[int] = mapped_column(ForeignKey('chat_members.id'),
                                                 default=None)
+
+
+class AdmissionCommitteTimetableRecord(Base):
+    """Stores info about the admission committee timetable"""
+
+    __tablename__ = 'admission_committe_timetable'
+
+    date: Mapped[datetime.date]
+    work_start: Mapped[datetime.time]
+    work_end: Mapped[datetime.time]
+    committe_chat_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey('admission_committe_info.chat_id'),
+        primary_key=True,
+        autoincrement=False,
+        default=None,
+    )
+    committe: Mapped['AdmissionCommitteInfo'] = relationship(
+        lazy='raise',
+        default=None,
+        back_populates='timetable',
+    )
+
+
+class AdmissionCommitteInfo(Base):
+    """Stores info about the admission committee in the chat"""
+
+    __tablename__ = 'admission_committe_info'
+
+    chat_id: Mapped[int] = mapped_column(BigInteger,
+                                         ForeignKey('abit_chat_info.chat_id'),
+                                         autoincrement=False, default=None,
+                                         primary_key=True)
+    chat: Mapped[AbitChatInfo] = relationship(default=None)
+    queue_url: Mapped[str] = mapped_column(String(MAX_URL_LENGTH),
+                                           nullable=True, default=None)
+    timetable: Mapped[list[AdmissionCommitteTimetableRecord]] = relationship(
+        lazy='raise',
+        default_factory=list,
+        back_populates='committe',
+        order_by=AdmissionCommitteTimetableRecord.date,
+    )
+    required_documents_url: Mapped[str] = mapped_column(String(MAX_URL_LENGTH),
+                                                        nullable=True,
+                                                        default=None)
+

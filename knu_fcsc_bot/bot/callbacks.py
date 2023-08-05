@@ -139,6 +139,33 @@ async def cd_useful_links(update: Update, context: CallbackContext) -> None:
     ))
 
 
+@reschedule_message_deletion_on_interaction(DELETE_INFO_MENU_AFTER)
+async def cd_admission_committe(update: Update,
+                                context: CallbackContext) -> None:
+    """Displays the info about the admission committe"""
+    user = update.effective_user
+    chat = update.effective_chat
+    logger.info(f'{user} requested the info about the admission '
+                f'committe {chat}')
+
+    session = context.bot_data['AsyncSession']()
+    async with session:
+        admission_committe_info = (
+            await usecases.get_admission_committe_info_usecase(
+                session=session,
+                chat_id=chat.id,
+            )
+        )
+
+    markup = markups.get_admission_committe_info_markup(
+        admission_committe_info=admission_committe_info,
+        requested_by=user,
+    )
+    await update.effective_message.edit_caption(
+        **markup.to_kwargs(caption_only=True)
+    )
+
+
 async def cmd_info(update: Update, context: CallbackContext) -> None:
     """Displays main page of info menu"""
     user = update.effective_user
