@@ -234,8 +234,8 @@ def _build_admission_committe_timetable_text(
         timetable: list[AdmissionCommitteTimetableRecord],
 ) -> str:
     """Builds a timetable text"""
-    timetable_record_format = ('{record.date:%d.%m} {record.start_time:%H:%M}-'
-                               '{record.end_time:%H:%M}}')
+    timetable_record_format = ('{record.date:%d.%m} {record.work_start:%H:%M}-'
+                               '{record.work_end:%H:%M}')
     timetable_lines = [
         timetable_record_format.format(record=record)
         for record in timetable
