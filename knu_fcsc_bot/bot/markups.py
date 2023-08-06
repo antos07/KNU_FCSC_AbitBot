@@ -68,7 +68,7 @@ def _build_main_page_of_info_menu_reply_markup(
     if abit_chat_info.admission_committe_info:
         button_column += [
             InlineKeyboardButton(
-                text='🏫 Прийомна комісія',
+                text='🏫 Приймальна комісія',
                 callback_data='admission_committe',
             ),
         ]
@@ -292,7 +292,7 @@ def get_admission_committe_info_markup(
     markup.photo = admission_committe_info.chat.greeting_photo_file_id
     markup.caption = (f'<b>[📖Інформаційна довідка</b> для '
                       f'{requested_by.mention_html()}<b>]</b>\n\n'
-                      f'🏫 Прийомна комісія\n\n'
+                      f'🏫 Приймальна комісія\n\n'
                       f'Розклад:\n')
     markup.caption += _build_timetable_text(
         timetable=admission_committe_info.timetable)
