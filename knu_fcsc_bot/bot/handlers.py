@@ -18,14 +18,6 @@ def setup_handlers(app: Application) -> None:
         callback=callbacks.chat_member_recorder,
     ), group=-1)
 
-    # Skip messages from all chats, except allowed chats
-    allowed_chat_filter = filters.Chat()
-    app.bot_data['allowed_chat_filter'] = allowed_chat_filter
-    app.add_handler(MessageHandler(
-        filters=~allowed_chat_filter,
-        callback=callbacks.message_from_not_allowed_chat,
-    ))
-
     # Delete message sent via forbidden bots
     # TODO implement more generic moderation via loading the bot list
     # from the db.
@@ -37,6 +29,14 @@ def setup_handlers(app: Application) -> None:
         filters=via_forbidden_bot_filter,
         callback=callbacks.message_via_forbidden_bot,
         block=False,
+    ))
+
+    # Skip messages from all chats, except allowed chats
+    allowed_chat_filter = filters.Chat()
+    app.bot_data['allowed_chat_filter'] = allowed_chat_filter
+    app.add_handler(MessageHandler(
+        filters=~allowed_chat_filter,
+        callback=callbacks.message_from_not_allowed_chat,
     ))
 
     # Logging when this bot is added to chats
