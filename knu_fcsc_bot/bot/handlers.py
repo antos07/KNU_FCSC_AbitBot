@@ -26,6 +26,19 @@ def setup_handlers(app: Application) -> None:
         callback=callbacks.message_from_not_allowed_chat,
     ))
 
+    # Delete message sent via forbidden bots
+    # TODO implement more generic moderation via loading the bot list
+    # from the db.
+    forbidden_bot_usernames = [
+        'HowYourBot',
+    ]
+    via_forbidden_bot_filter = filters.ViaBot(username=forbidden_bot_usernames)
+    app.add_handler(MessageHandler(
+        filters=via_forbidden_bot_filter,
+        callback=callbacks.message_via_forbidden_bot,
+        block=False,
+    ))
+
     # Logging when this bot is added to chats
     app.add_handler(ChatMemberHandler(
         callback=callbacks.my_chat_member_updated,

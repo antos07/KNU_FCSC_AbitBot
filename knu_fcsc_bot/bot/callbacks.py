@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from loguru import logger
 from telegram import Update
+from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
 from knu_fcsc_bot import usecases
@@ -328,3 +329,14 @@ async def cmd_top_penguins(update: Update, context: CallbackContext) -> None:
         after=DELETE_MISC_MESSAGE_AFTER,
         with_reply_to=True,
     )
+
+
+async def message_via_forbidden_bot(update: Update,
+                                    context: CallbackContext) -> None:
+    """Trys to delete a message sent via a forbidden bot"""
+    message = update.effective_message
+    logger.info(f'{message.from_user} sent a message via '
+                f'forbidden {message.via_bot}')
+
+    with suppress(TelegramError):
+        await message.delete()
