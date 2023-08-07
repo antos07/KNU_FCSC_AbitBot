@@ -2,8 +2,8 @@ import datetime
 import html
 from dataclasses import dataclass, asdict
 from typing import Any, NamedTuple, Protocol
+from zoneinfo import ZoneInfo
 
-from dateutil.tz import gettz
 from telegram import (User, InlineKeyboardMarkup, InlineKeyboardButton,
                       PhotoSize, )
 from telegram._utils.types import ReplyMarkup, FileInput
@@ -11,7 +11,7 @@ from telegram._utils.types import ReplyMarkup, FileInput
 from knu_fcsc_bot.models import (AbitChatInfo, Program, UsefulLink,
                                  AdmissionCommitteInfo, )
 
-KYIV_TZ = gettz('Europe/Kyiv')
+KYIV_TZ = ZoneInfo('Europe/Kyiv')
 
 
 @dataclass
