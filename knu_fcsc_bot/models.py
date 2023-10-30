@@ -1,159 +1,86 @@
-import datetime
+from typing import Annotated
 
-from sqlalchemy import String, BigInteger, ForeignKey, Index
+from sqlalchemy import BigInteger, String, ForeignKey
 from sqlalchemy.orm import (DeclarativeBase, Mapped, mapped_column,
-                            relationship, MappedAsDataclass, )
+                            relationship, )
 
-MAX_URL_LENGTH = 500
+MAX_URL_LENGTH: int = 500
+"""The max allowed length of url"""
+
+Url = Annotated[str, mapped_column(String(MAX_URL_LENGTH))]
+"""A shortcut for mapped url"""
 
 
-class Base(MappedAsDataclass, DeclarativeBase):
+class Base(DeclarativeBase):
     """A base class for all models"""
 
 
-class UsefulLink(Base):
-    """A useful link in chat"""
-    MAX_TITLE_LENGTH = 50
+class Chat(Base):
+    """Telegram chat data"""
 
-    __tablename__ = 'useful_links'
+    # Constants:
+    MAX_TITLE_LENGTH: int = 256
+    """The maximal allowed length of the title"""
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True,
-                                    init=False)
+    # Dunder vars
+    __tablename__ = 'chats'
+
+    # Mapped attributes
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True,
+                                    autoincrement=False)
+    """The id of a telegram chat"""
     title: Mapped[str] = mapped_column(String(MAX_TITLE_LENGTH))
-    url: Mapped[str] = mapped_column(String(MAX_URL_LENGTH))
+    """A current chat title. Not longer than :attr:`MAX_TITLE_LENGTH`."""
+    description: Mapped[str]
+    """A current description of the chat"""
+    invite_link: Mapped[Url]
+    """An invite link for this chat."""
 
+
+class ApplicantChat:
+    """Stores applicant chat info"""
+
+    # Dunder vars
+    __tablename__ = 'applicant_chats'
+
+    # Mapped attributes
     chat_id: Mapped[int] = mapped_column(BigInteger,
-                                         ForeignKey('abit_chat_info'),
-                                         default=None)
-
-
-class Program(Base):
-    """Information about available program"""
-    MAX_TITLE_LENGTH = 50
-
-    __tablename__ = 'programs'
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True,
-                                    init=False)
-    title: Mapped[str] = mapped_column(String(MAX_TITLE_LENGTH))
-    guide_url: Mapped[str] = mapped_column(String(MAX_URL_LENGTH))
-
-    chat_id: Mapped[int] = mapped_column(BigInteger,
-                                         ForeignKey('abit_chat_info'),
-                                         default=None)
-
-
-class AbitChatInfo(Base):
-    """Some basic info to be displayed in the abiturient chat"""
-    MAX_FILE_ID_LENGTH = 100
-
-    __tablename__ = 'abit_chat_info'
-
-    chat_id: Mapped[int] = mapped_column(BigInteger,
+                                         ForeignKey(Chat.id,
+                                                    ondelete='CASCADE'),
                                          primary_key=True, autoincrement=False)
-    greeting_photo_file_id: Mapped[str] = mapped_column(
-        String(MAX_FILE_ID_LENGTH),
-    )
-    flood_chat_link: Mapped[str] = mapped_column(String(MAX_URL_LENGTH))
-    useful_links: Mapped[list[UsefulLink]] = relationship(
-        default_factory=list,
-        lazy='raise'
-    )
-    programs: Mapped[list[Program]] = relationship(
-        default_factory=list,
-        lazy='raise'
-    )
-    admission_committe_info: Mapped[
-        'AdmissionCommitteInfo | None'] = relationship(
-        back_populates='chat',
-        uselist=False,
-        default=None,
-    )
+    """The id of the chat"""
+    flood_chat_id: Mapped[int] = mapped_column(BigInteger,
+                                               ForeignKey('flood_chats.'
+                                                          'chat_id'))
+    """The id of a related flood chat"""
+    greet_new_members: Mapped[bool] = mapped_column(default=False)
+    """Flag for displaying greetings. Defaults to False"""
+    active: Mapped[bool] = mapped_column(default=False)
+    """Flag for validating that the applicant chat is active. Defaults to 
+    False."""
+
+    # Relationships
+    chat: Mapped[Chat] = relationship()
+    """An instance of related telegram chat"""
+    flood_chat: Mapped['FloodChat'] = relationship()
+    """An instance of related flood chat"""
 
 
-class ChatMember(Base):
-    """A member of abit chat"""
+class FloodChat(Base):
+    """Stores flood chat related data"""
 
-    __tablename__ = 'chat_members'
+    # Dunder attributes
+    __tablename__ = 'flood_chats'
 
-    id: Mapped[int] = mapped_column(primary_key=True, init=False, default=None)
-    user_id: Mapped[int] = mapped_column(BigInteger)
-    abit_chat: Mapped[AbitChatInfo] = relationship(lazy='raise')
+    # Mapped attributes
     chat_id: Mapped[int] = mapped_column(BigInteger,
-                                         ForeignKey('abit_chat_info.chat_id'),
-                                         autoincrement=False,
-                                         default=None)
+                                         ForeignKey(Chat.id,
+                                                    ondelete='CASCADE'),
+                                         primary_key=True, autoincrement=False)
+    """The id of the telegram chat"""
 
-    penguins: Mapped[list['SentPenguinRecord']] = relationship(
-        lazy=True,
-        back_populates='chat_member',
-        default_factory=list,
-    )
+    # TODO: Introduce more attributes
 
-    __table_args__ = (
-        Index('ix_chat_members__user_id__chat_id', 'user_id',
-              'chat_id', unique=True),
-    )
-
-
-class SentPenguinRecord(Base):
-    """Records sent penguin gifs"""
-
-    __tablename__ = 'sent_penguin_records'
-
-    id: Mapped[int] = mapped_column(primary_key=True, default=None, init=False)
-    timestamp: Mapped[datetime.datetime]
-    chat_member: Mapped[ChatMember] = relationship(
-        lazy=False,
-        back_populates='penguins',
-    )
-
-    chat_member_id: Mapped[int] = mapped_column(ForeignKey('chat_members.id'),
-                                                default=None)
-
-
-class AdmissionCommitteTimetableRecord(Base):
-    """Stores info about the admission committee timetable"""
-
-    __tablename__ = 'admission_committe_timetable'
-
-    id: Mapped[int] = mapped_column(primary_key=True, init=False,
-                                    default=None)
-    date: Mapped[datetime.date]
-    work_start: Mapped[datetime.time]
-    work_end: Mapped[datetime.time]
-    committe_chat_id: Mapped[int] = mapped_column(
-        BigInteger,
-        ForeignKey('admission_committe_info.chat_id'),
-        autoincrement=False,
-        default=None,
-    )
-    committe: Mapped['AdmissionCommitteInfo'] = relationship(
-        lazy='raise',
-        default=None,
-        back_populates='timetable',
-    )
-
-
-class AdmissionCommitteInfo(Base):
-    """Stores info about the admission committee in the chat"""
-
-    __tablename__ = 'admission_committe_info'
-
-    chat_id: Mapped[int] = mapped_column(BigInteger,
-                                         ForeignKey('abit_chat_info.chat_id'),
-                                         autoincrement=False, default=None,
-                                         primary_key=True)
-    chat: Mapped[AbitChatInfo] = relationship(default=None)
-    queue_url: Mapped[str] = mapped_column(String(MAX_URL_LENGTH),
-                                           nullable=True, default=None)
-    timetable: Mapped[list[AdmissionCommitteTimetableRecord]] = relationship(
-        lazy='raise',
-        default_factory=list,
-        back_populates='committe',
-        order_by=AdmissionCommitteTimetableRecord.date,
-    )
-    required_documents_url: Mapped[str] = mapped_column(String(MAX_URL_LENGTH),
-                                                        nullable=True,
-                                                        default=None)
-
+    # Relationships:
+    chat: Mapped[Chat] = relationship()
+    """An instance of related telegram chat"""
