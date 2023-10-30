@@ -8,17 +8,18 @@ packages = [{ include = "knu_fcsc_bot" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-python-telegram-bot = { extras = ["http2", "job-queue", "rate-limiter", "webhooks"], version = "^20.4" }
-loguru = "^0.7.0"
-sqlalchemy = "^2.0.19"
-alembic = "^1.11.1"
-psycopg = { extras = ["binary"], version = "^3.1.10" }
+python-telegram-bot = {extras = ["http2", "job-queue", "rate-limiter", "webhooks"], version = "^20.6"}
+loguru = "^0.7.2"
+sqlalchemy = "^2.0.22"
+alembic = "^1.12.1"
+psycopg = {extras = ["binary"], version = "^3.1.12"}
 python-dateutil = "^2.8.2"
 tzdata = "*"
 
 
 [tool.poetry.group.dev.dependencies]
-telethon = "^1.29.2"
+black = "^23.10.1"
+telethon = "^1.31.1"
 
 [build-system]
 requires = ["poetry-core"]
