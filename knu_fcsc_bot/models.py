@@ -1,8 +1,13 @@
+from datetime import date, time
 from typing import Annotated
 
 from sqlalchemy import BigInteger, String, ForeignKey
-from sqlalchemy.orm import (DeclarativeBase, Mapped, mapped_column,
-                            relationship, )
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
 MAX_URL_LENGTH: int = 500
 """The max allowed length of url"""
@@ -23,11 +28,10 @@ class Chat(Base):
     """The maximal allowed length of the title"""
 
     # Dunder vars
-    __tablename__ = 'chats'
+    __tablename__ = "chats"
 
     # Mapped attributes
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True,
-                                    autoincrement=False)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=False)
     """The id of a telegram chat"""
     title: Mapped[str] = mapped_column(String(MAX_TITLE_LENGTH))
     """A current chat title. Not longer than :attr:`MAX_TITLE_LENGTH`."""
@@ -37,21 +41,23 @@ class Chat(Base):
     """An invite link for this chat."""
 
 
-class ApplicantChat:
+class ApplicantChat(Base):
     """Stores applicant chat info"""
 
     # Dunder vars
-    __tablename__ = 'applicant_chats'
+    __tablename__ = "applicant_chats"
 
     # Mapped attributes
-    chat_id: Mapped[int] = mapped_column(BigInteger,
-                                         ForeignKey(Chat.id,
-                                                    ondelete='CASCADE'),
-                                         primary_key=True, autoincrement=False)
+    chat_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(Chat.id, ondelete="CASCADE"),
+        primary_key=True,
+        autoincrement=False,
+    )
     """The id of the chat"""
-    flood_chat_id: Mapped[int] = mapped_column(BigInteger,
-                                               ForeignKey('flood_chats.'
-                                                          'chat_id'))
+    flood_chat_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("flood_chats." "chat_id")
+    )
     """The id of a related flood chat"""
     greet_new_members: Mapped[bool] = mapped_column(default=False)
     """Flag for displaying greetings. Defaults to False"""
@@ -62,21 +68,26 @@ class ApplicantChat:
     # Relationships
     chat: Mapped[Chat] = relationship()
     """An instance of related telegram chat"""
-    flood_chat: Mapped['FloodChat'] = relationship()
+    flood_chat: Mapped["FloodChat"] = relationship()
     """An instance of related flood chat"""
+    admission_committee_timetable: Mapped[
+        list["AdmissionCommitteeTimetableRecord"]
+    ] = relationship(back_populates="applicant_chat")
 
 
 class FloodChat(Base):
     """Stores flood chat related data"""
 
     # Dunder attributes
-    __tablename__ = 'flood_chats'
+    __tablename__ = "flood_chats"
 
     # Mapped attributes
-    chat_id: Mapped[int] = mapped_column(BigInteger,
-                                         ForeignKey(Chat.id,
-                                                    ondelete='CASCADE'),
-                                         primary_key=True, autoincrement=False)
+    chat_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(Chat.id, ondelete="CASCADE"),
+        primary_key=True,
+        autoincrement=False,
+    )
     """The id of the telegram chat"""
 
     # TODO: Introduce more attributes
@@ -84,3 +95,30 @@ class FloodChat(Base):
     # Relationships:
     chat: Mapped[Chat] = relationship()
     """An instance of related telegram chat"""
+
+
+class AdmissionCommitteeTimetableRecord(Base):
+    """Represent records in the admission committe timetable"""
+
+    # Dunder attributes
+    __tablename__ = "admission_committee_timetable"
+
+    # Mapped attributes
+    applicant_chat_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(ApplicantChat.chat_id, ondelete="CASCADE"),
+        primary_key=True,
+        autoincrement=False,
+    )
+    """The id of the applicant chat, for which the timetable is displayed."""
+    date: Mapped[date]
+    """The date of this record"""
+    start_time: Mapped[time]
+    """The start of working hours on the given day"""
+    end_time: Mapped[time]
+    """The end of working hours on the given day"""
+
+    # Relationships
+    applicant_chat: Mapped[ApplicantChat] = relationship(
+        back_populates="admission_committee_timetable",
+    )
