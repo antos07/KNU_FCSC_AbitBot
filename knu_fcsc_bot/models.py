@@ -368,3 +368,12 @@ class Message(Base):
     sent_at: Mapped[datetime]
     last_edit_at: Mapped[datetime]
     content: Mapped[dict[str, Any]] = mapped_column(JSON)
+
+
+class WebAdmin(Base):
+    __tablename__ = 'admins'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(100))
+    password_hash: Mapped[str] = mapped_column(String(256))
+    can_edit_admins: Mapped[bool]
