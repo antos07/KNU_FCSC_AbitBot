@@ -40,6 +40,9 @@ class Chat(Base):
     invite_link: Mapped[Url]
     """An invite link for this chat."""
 
+    # Relationships
+    members: Mapped[list['ChatMemeber']] = relationship(back_populates='chat')
+
 
 applicant_chat_programs_table = Table(
     "applicant_chat_programs",
@@ -258,3 +261,62 @@ class UsefulLink(Base):
     """A link title. Not longer than :attr:`MAX_TITLE_LENGTH`"""
     url: Mapped[Url]
     """An actual url"""
+
+
+class User(Base):
+    """A telegram user"""
+
+    # Dunder attributes
+    __tablename__ = "users"
+
+    # Constants
+    MAX_NAME_LENGTH: int = 256
+    """Max allowed length of :attr:`first_name` and :attr:`last_name` attributes"""
+
+    # Mapped attributes
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=False)
+    """The telegram id of a user"""
+    first_name: Mapped[str] = mapped_column(String(MAX_NAME_LENGTH))
+    """The user first name. Not longer than :attr:`MAX_NAME_LENGTH`"""
+    last_name: Mapped[str | None] = mapped_column(String(MAX_NAME_LENGTH))
+    """Optional. The user last name. Not longer than :attr:`MAX_NAME_LENGTH`"""
+    username: Mapped[str | None] = mapped_column(String(MAX_NAME_LENGTH))
+    """Optional. Thu username. Not longer than :attr:`MAX_NAME_LENGTH`."""
+
+    # Relationship
+    memberships: Mapped[list["ChatMemeber"]] = relationship(back_populates="user")
+
+
+class ChatMemeber(Base):
+    """A telegram chat member"""
+
+    # Dunder attributes.
+    __tablename__ = "chat_members"
+
+    # Mapped attributes
+    chat_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Chat.id), primary_key=True, autoincrement=False
+    )
+    user_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(User.id), primary_key=True, autoincrement=False
+    )
+    joined: Mapped[datetime]
+    role_id: Mapped[int] = mapped_column(ForeignKey("chat_roles.id"))
+
+    # Relationships
+    user: Mapped[User] = relationship(back_populates="memberships")
+    chat: Mapped[Chat] = relationship(back_populates="members")
+    role: Mapped["ChatRole"] = relationship()
+
+
+class ChatRole(Base):
+    """A role in chat"""
+
+    __tablename__ = "chat_roles"
+
+    # Constants
+    MAX_NAME_LENGTH: int = 30
+
+    # Mapped attributes
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(MAX_NAME_LENGTH))
