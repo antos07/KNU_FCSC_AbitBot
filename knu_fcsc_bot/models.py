@@ -41,7 +41,7 @@ class Chat(Base):
     """An invite link for this chat."""
 
     # Relationships
-    members: Mapped[list['ChatMemeber']] = relationship(back_populates='chat')
+    members: Mapped[list["ChatMemeber"]] = relationship(back_populates="chat")
 
 
 applicant_chat_programs_table = Table(
@@ -316,6 +316,37 @@ class ChatRole(Base):
 
     # Constants
     MAX_NAME_LENGTH: int = 30
+
+    # Mapped attributes
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(MAX_NAME_LENGTH))
+
+
+class ChatMemeberLimitation(Base):
+    __tablename__ = "chat_member_limitations"
+
+    # Mapped attributes
+    chat_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Chat.id), primary_key=True, autoincrement=False
+    )
+    user_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(User.id), primary_key=True, autoincrement=False
+    )
+    start: Mapped[datetime]
+    end: Mapped[datetime | None]
+    type_id: Mapped[int] = mapped_column(ForeignKey("chat_member_limitation_types.id"))
+
+    # Relationships
+    user: Mapped[User] = relationship(back_populates="memberships")
+    chat: Mapped[Chat] = relationship(back_populates="members")
+    role: Mapped["ChatMemeberLimitationType"] = relationship()
+
+
+class ChatMemeberLimitationType(Base):
+    __tablename__ = "chat_member_limitation_types"
+
+    # Constants
+    MAX_NAME_LENGTH: int = 10
 
     # Mapped attributes
     id: Mapped[int] = mapped_column(primary_key=True)
