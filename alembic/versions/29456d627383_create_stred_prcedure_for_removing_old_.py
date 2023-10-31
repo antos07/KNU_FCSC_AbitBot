@@ -20,10 +20,8 @@ def upgrade() -> None:
     LANGUAGE SQL
     AS
     $$
-    BEGIN;
         DELETE FROM messages
         WHERE messages.sent_at < NOW() - INTERVAL '1 DAY';
-    END;
     $$
     """)
 
