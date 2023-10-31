@@ -1,7 +1,8 @@
 from datetime import date, time, datetime
-from typing import Annotated
+from typing import Annotated, Any
 
-from sqlalchemy import BigInteger, String, ForeignKey, func, Table, Column
+from sqlalchemy import BigInteger, String, ForeignKey, func, Table, Column, \
+    JSON
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -351,3 +352,19 @@ class ChatMemeberLimitationType(Base):
     # Mapped attributes
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(MAX_NAME_LENGTH))
+
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    # Mapped attributes
+    message_id: Mapped[int] = mapped_column(
+        BigInteger, primary_key=True, autoincrement=False
+    )
+    chat_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Chat.id), primary_key=True, autoincrement=False
+    )
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(User.id))
+    sent_at: Mapped[datetime]
+    last_edit_at: Mapped[datetime]
+    content: Mapped[dict[str, Any]] = mapped_column(JSON)
