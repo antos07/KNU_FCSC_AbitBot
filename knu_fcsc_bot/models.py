@@ -153,11 +153,11 @@ class AdmissionCommitteeTimetableRecord(Base):
     __tablename__ = "admission_committee_timetable"
 
     # Mapped attributes
+    id: Mapped[int] = mapped_column(primary_key=True)
+    """A record id"""
     applicant_chat_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey(ApplicantChat.chat_id, ondelete="CASCADE"),
-        primary_key=True,
-        autoincrement=False,
     )
     """The id of the applicant chat, for which the timetable is displayed."""
     date: Mapped[date]
