@@ -1,8 +1,15 @@
 from datetime import date, time, datetime
 from typing import Annotated, Any
 
-from sqlalchemy import BigInteger, String, ForeignKey, func, Table, Column, \
-    JSON
+from sqlalchemy import (
+    BigInteger,
+    String,
+    ForeignKey,
+    func,
+    Table,
+    Column,
+    JSON,
+)
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -327,12 +334,9 @@ class ChatMemeberLimitation(Base):
     __tablename__ = "chat_member_limitations"
 
     # Mapped attributes
-    chat_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Chat.id), primary_key=True, autoincrement=False
-    )
-    user_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(User.id), primary_key=True, autoincrement=False
-    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    chat_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Chat.id))
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(User.id))
     start: Mapped[datetime]
     end: Mapped[datetime | None]
     type_id: Mapped[int] = mapped_column(ForeignKey("chat_member_limitation_types.id"))
@@ -371,7 +375,7 @@ class Message(Base):
 
 
 class WebAdmin(Base):
-    __tablename__ = 'admins'
+    __tablename__ = "admins"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(100))
